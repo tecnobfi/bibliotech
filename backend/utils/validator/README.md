@@ -4,7 +4,7 @@ El módulo **Validator** es un motor de validación de datos desacoplado del pro
 
 ---
 
-## 📐 Patrones de Diseño Aplicados
+## ⧉ Patrones de Diseño Aplicados
 
 1. **Fluent Interface (Interfaz Fluida):** Permite encadenar llamadas a métodos (`validateThis(...).with(...)`) mejorando la legibilidad del código.
 2. **Visitor / Encadenamiento:** La clase `Validator` actúa como visitante al inyectar su propia instancia (`ruleObject.validator = this`) dentro de la regla que se está ejecutando.
@@ -12,7 +12,7 @@ El módulo **Validator** es un motor de validación de datos desacoplado del pro
 
 ---
 
-## 📁 Estructura del Módulo
+## ⧉ Estructura del Módulo
 
 ```text
 utils/validator/
@@ -21,7 +21,7 @@ utils/validator/
 └── README.md
 ```
 
-🛠️ Métodos Principales de Validator
+⧉ Métodos Principales de Validator
 1. isValid(target, ruleObject)
 Evalúa un objetivo contra una regla de forma booleana y silenciosa (no lanza excepciones ni consulta traducciones).
 
@@ -47,7 +47,7 @@ Parámetros: ruleObject (Object): Instancia de la regla.
 
 Retorno: Instancia de Validator (this).
 
-💻 Ejemplos de Uso
+⧉ Ejemplos de Uso
 Uso Booleano Silencioso (isValid)
 
 ```JavaScript
