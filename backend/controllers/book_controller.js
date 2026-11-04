@@ -112,6 +112,37 @@
              next(error);
          }
      }
+     /**
+      * @brief Modifica los metadatos de un documento específico validando previamente la propiedad del mismo.
+      * @param {Object} req - Petición HTTP.
+      * @param {Object} res - Respuesta HTTP.
+      * @param {Function} next - Función para delegar errores.
+      */
+     async updateMetadata(req, res, next){
+        try {
+            const {id} = req.params;
+            const userId = req.userId;
+            const { title, author, category, pages } = req.body;
+            
+            const book = await bookRepository.findById(id, userId);
+
+            if (!book){
+                const message = i18n.getMessage('CT_BOOK_NOT_FOUND');
+                return res.status(404).json({message})
+            }
+
+            await bookRepository.updateMetadata(id, userId, datos);
+
+            const message = i18n.getMessage('CT_BOOK_UPDATE');
+            return res.status(200).json(message);
+
+
+        }
+        catch(error)
+        {
+            next(error)
+        }
+     }
  }
  
  module.exports = new BookController();
