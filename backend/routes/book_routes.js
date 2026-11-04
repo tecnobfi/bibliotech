@@ -47,7 +47,6 @@ const validationMiddleware = require('../middleware/validation_middleware');
   * @router PUT /api/books/:id
   * @brief Actualiza los metadatos de un libro especifico
   */
-
-    router.put('/:id', authMiddleware.verifyToken, validationMiddleware.validateBookUpload, bookController.updateMetadata);
+  router.put('/:id', authMiddleware.verifyToken, validationMiddleware.validateBookUpdate, bookController.updateMetadata);
  
  module.exports = router;

@@ -74,7 +74,7 @@
          return true;
      }
 
-     async metadataUpdate(id, userId, bookData){
+     async updateMetadata(id, userId, bookData){
         const {title, author, category, pages} = bookData;
 
         const [result] = await db.execute(

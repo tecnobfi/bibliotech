@@ -219,7 +219,7 @@ END //
 * @param p_pages: cant de paginas nuevas
 */
 
-CREATE PROCEDURE sp_update_book_metadate(
+CREATE PROCEDURE sp_update_book_metadata(
     IN p_book_id INT,
     IN p_user_id INT,
     IN p_title VARCHAR(100),
@@ -233,7 +233,7 @@ BEGIN
         author = p_author,
         category = p_category,
         pages = p_pages
-    WHERE id = p_book_id and id_user = p_user_id
+    WHERE id = p_book_id and user_id = p_user_id;
 END //
 
 

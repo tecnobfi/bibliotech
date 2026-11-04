@@ -126,10 +126,11 @@
       * @param {Function} next - Función de delegación de Express.
     */
 
-    validatorBookUpdate: (req, res, next) => {
+    validateBookUpdate: (req, res, next) => {
         try {
             const validator = new Validator();
-
+            const { title, author, category, pages } = req.body;
+            
             validator.validateThis(title).with(new Required("CT_REQ_TITLE"));
             validator.validateThis(author).with(new Required("CT_REQ_AUTHOR"));
             validator.validateThis(category).with(new Required("CT_REQ_CATEGORY"));
