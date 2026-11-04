@@ -22,102 +22,124 @@
  
  const validationMiddleware = {
      
-     /**
+    /**
       * @brief Valida la estructura de los datos requeridos para registrar un nuevo usuario.
       * @param {Object} req - Objeto de petición HTTP (req.body debe contener username y password).
       * @param {Object} res - Objeto de respuesta HTTP.
       * @param {Function} next - Pasa el control al controlador si la validación es exitosa.
       * @returns {Object|void} Retorna HTTP 400 Bad Request en caso de fallo sintáctico.
-      */
-     validateRegister: (req, res, next) => 
-     {
-         const { username, password } = req.body;
-         const validator = new Validator();
+      
+    */
+    validateRegister: (req, res, next) => 
+    {
+        const { username, password } = req.body;
+        const validator = new Validator();
          
-         try 
-         {
-             // Fluent Interface: Encadenamiento imperativo de reglas sobre un mismo objetivo
-             validator.validateThis(username).with(new Required("CT_REQ_USERNAME"));
+        try 
+        {
+            // Fluent Interface: Encadenamiento imperativo de reglas sobre un mismo objetivo
+            validator.validateThis(username).with(new Required("CT_REQ_USERNAME"));
              
-             validator.validateThis(password)
-                      .with(new Required("CT_REQ_PASSWORD"))
-                      .with(new MinLength(5, "CT_PASS_TOO_SHORT"));
+            validator.validateThis(password)
+                     .with(new Required("CT_REQ_PASSWORD"))
+                     .with(new MinLength(5, "CT_PASS_TOO_SHORT"));
              
-             next();
-         } 
-         catch (error) 
-         {
-             // Las reglas lanzan una excepción con el mensaje ya traducido (i18n)
-             return res.status(400).json({ message: error.message });
-         }
-     },
- 
-     /**
+            next();
+        } 
+        catch (error) 
+        {
+            // Las reglas lanzan una excepción con el mensaje ya traducido (i18n)
+            return res.status(400).json({ message: error.message });
+        }
+    },
+
+    /**
       * @brief Valida la presencia de credenciales mínimas antes de intentar un inicio de sesión.
       * @param {Object} req - Objeto de petición HTTP.
       * @param {Object} res - Objeto de respuesta HTTP.
       * @param {Function} next - Función de delegación de Express.
-      */
-     validateLogin: (req, res, next) => 
-     {
-         const { username, password } = req.body;
-         const validator = new Validator();
+    */
+    validateLogin: (req, res, next) => 
+    {
+        const { username, password } = req.body;
+        const validator = new Validator();
  
-         try 
-         {
-             // Se re-utiliza la regla "Required" inyectando distintas claves de traducción
-             validator.validateThis(username).with(new Required("CT_REQ_CREDENTIALS"));
-             validator.validateThis(password).with(new Required("CT_REQ_CREDENTIALS"));
+        try 
+        {
+            // Se re-utiliza la regla "Required" inyectando distintas claves de traducción
+            validator.validateThis(username).with(new Required("CT_REQ_CREDENTIALS"));
+            validator.validateThis(password).with(new Required("CT_REQ_CREDENTIALS"));
              
-             next();
-         } 
-         catch (error) 
-         {
-             return res.status(400).json({ message: error.message });
-         }
-     },
+            next();
+        } 
+        catch (error) 
+        {
+            return res.status(400).json({ message: error.message });
+        }
+    },
  
-     /**
+    /**
       * @brief Valida la integridad de un formulario Multipart (texto + archivo PDF) para la carga de libros.
       * @param {Object} req - Petición HTTP (procesada previamente por Multer, incluye req.file y req.body).
       * @param {Object} res - Objeto de respuesta HTTP.
       * @param {Function} next - Función de delegación de Express.
-      */
-     validateBookUpload: (req, res, next) => 
-     {
-         const validator = new Validator();
-         const { title, author, category, pages } = req.body;
+    */
+    validateBookUpload: (req, res, next) => 
+    {
+        const validator = new Validator();
+        const { title, author, category, pages } = req.body;
  
-         try 
-         {
-             // Validación específica de presencia de archivo. 
-             // Multer procesa el archivo antes que este middleware valide los campos de texto.
-             if (!req.file) 
-             {
-                 throw new Error(validator.i18n.getMessage("CT_FILE_REQUIRED"));
-             }
+        try 
+        {
+            // Validación específica de presencia de archivo. 
+            // Multer procesa el archivo antes que este middleware valide los campos de texto.
+            if (!req.file) 
+            {
+                throw new Error(validator.i18n.getMessage("CT_FILE_REQUIRED"));
+            }
  
-             validator.validateThis(title).with(new Required("CT_REQ_TITLE"));
-             validator.validateThis(author).with(new Required("CT_REQ_AUTHOR"));
-             validator.validateThis(category).with(new Required("CT_REQ_CATEGORY"));
-             validator.validateThis(pages).with(new PositiveNumber("CT_PAGES_POSITIVE"));
+            validator.validateThis(title).with(new Required("CT_REQ_TITLE"));
+            validator.validateThis(author).with(new Required("CT_REQ_AUTHOR"));
+            validator.validateThis(category).with(new Required("CT_REQ_CATEGORY"));
+            validator.validateThis(pages).with(new PositiveNumber("CT_PAGES_POSITIVE"));
  
-             next();
-         } 
-         catch (error) 
-         {
-             /**
+            next();
+        } 
+        catch (error) 
+        {
+            /**
               * @note Rollback de Archivo: Si el archivo fue subido exitosamente a la carpeta temporal 
               * por Multer, pero los campos de texto fallan la validación, debemos eliminar físicamente 
               * el archivo huérfano para evitar fugas de almacenamiento (Storage Leaks).
-              */
-             if (req.file) 
-             {
-                 fileHelper.deleteFile(`/uploads/${req.file.filename}`);
-             }
-             return res.status(400).json({ message: error.message });
-         }
-     }
+            */
+            if (req.file) 
+            {
+                fileHelper.deleteFile(`/uploads/${req.file.filename}`);
+            }
+            return res.status(400).json({ message: error.message });
+        }
+    },
+    /**
+      * @brief Valida la integridad de los datos para la modificacion de los metadatos de un libro.
+      * @param {Object} req - Petición HTTP.
+      * @param {Object} res - Objeto de respuesta HTTP.
+      * @param {Function} next - Función de delegación de Express.
+    */
+
+    validatorBookUpdate: (req, res, next) => {
+        try {
+            const validator = new Validator();
+
+            validator.validateThis(title).with(new Required("CT_REQ_TITLE"));
+            validator.validateThis(author).with(new Required("CT_REQ_AUTHOR"));
+            validator.validateThis(category).with(new Required("CT_REQ_CATEGORY"));
+            validator.validateThis(pages).with(new PositiveNumber("CT_PAGES_POSITIVE"));
+
+            next()
+        } catch(error){
+            res.status(400).json({message: error.message });
+        }
+    }
  };
  
  module.exports = validationMiddleware;

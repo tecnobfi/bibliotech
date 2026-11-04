@@ -131,7 +131,7 @@
                 return res.status(404).json({message})
             }
 
-            await bookRepository.updateMetadata(id, userId, datos);
+            await bookRepository.updateMetadata(id, userId, { title, author, category, pages });
 
             const message = i18n.getMessage('CT_BOOK_UPDATE');
             return res.status(200).json(message);
