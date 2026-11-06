@@ -9,6 +9,7 @@
 
  const userRepository = require('../repositories/user_repository');
  const bookRepository = require('../repositories/book_repository');
+ const auditRepository = require('../repositories/audit_repository');
  const fileHelper = require('../utils/file_helper/file_helper');
  const i18n = require('../utils/i18n/i18n'); // Inyección del gestor de idiomas
  
@@ -69,6 +70,14 @@
                  const message = i18n.getMessage('CT_ADMIN_USER_NOT_FOUND');
                  return res.status(404).json({ message });
              }
+
+             // Agrega a la base de datos el registro de auditoría de que el administrador borró al usuario
+             await auditRepository.create({
+                 user_id: adminId,
+                 action: 'DELETE_USER',
+                 target: targetUserId,
+                 ip_address: req.ip
+             });
  
              // Limpieza física: Eliminar almacenamiento en disco
              userBooks.forEach(book => {fileHelper.deleteFile(book.file_path);});
