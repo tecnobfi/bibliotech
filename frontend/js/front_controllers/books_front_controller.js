@@ -68,6 +68,19 @@
          tdReading.appendChild(linkDownload);
  
          const tdActions = document.createElement('td');
+         
+         const btnEdit = document.createElement('button');
+         // Le pongo w3-tiny y w3-round para que sea idéntico a tus otros botones
+         btnEdit.className = 'w3-button w3-orange w3-text-white w3-tiny w3-round w3-margin-right';
+         btnEdit.textContent = 'Editar';
+         btnEdit.addEventListener('click', () => 
+         {
+             showEditBookModal(b, (updatedData) => {
+                 updateBook(b.id, updatedData);
+             });
+         });
+         tdActions.appendChild(btnEdit);
+
          const btnDelete = document.createElement('button');
          btnDelete.className = 'w3-button w3-red w3-tiny w3-round';
          btnDelete.textContent = 'Borrar';
@@ -100,6 +113,26 @@
          showModal('Error', error.message);
      }
  }
+
+ /**
+ * @brief Envía la solicitud PUT para actualizar los metadatos de un libro.
+ * @param {number} bookId ID del libro a editar.
+ * @param {Object} bookData Objeto con { title, author, category, pages }.
+ */
+async function updateBook(bookId, bookData) {
+    try {
+        // apiService.request ya maneja el token y ataja errores de red automáticamente
+        const response = await apiService.request(`/books/${bookId}`, 'PUT', bookData);
+        
+        // Usamos la alerta global segura del proyecto
+        showModal('Éxito', response.message || 'Documento actualizado correctamente');
+        
+        // Recargamos la tabla para que el usuario vea los datos nuevos instantáneamente
+        loadBooks();
+    } catch (error) {
+        showModal('Error al actualizar', error.message);
+    }
+}
  
  const uploadForm = document.getElementById('uploadForm');
  
