@@ -9,6 +9,7 @@
 
  const fileHelper = require('../utils/file_helper/file_helper');
  const bookRepository = require('../repositories/book_repository');
+ const auditRepository = require('../repositories/audit_repository');
  const i18n = require('../utils/i18n/i18n'); // Inyección del gestor de idiomas
  
  /**
@@ -100,6 +101,14 @@
  
              // Eliminar registro en base de datos
              await bookRepository.delete(id, userId);
+
+             // Agrega registro de auditoría en base de datos
+             await auditRepository.create({
+                  user_id: userId,
+                  action: 'DELETE_BOOK',
+                  target: id,
+                  ip_address: req.ip
+             });
  
              // Eliminar archivo físico en disco de forma síncrona
              fileHelper.deleteFile(book.file_path); 
