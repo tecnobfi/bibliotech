@@ -81,6 +81,21 @@ CREATE TABLE books (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
+/*
+ * @brief Tabla de auditoría de acciones críticas del sistema.
+ * @details Conserva un historial persistente de las operaciones realizadas.
+ * @note user_id no posee FK hacia users para preservar los registros
+ * aunque la cuenta del actor sea eliminada posteriormente.
+ */
+CREATE TABLE audit_logs (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    action VARCHAR(50) NOT NULL,
+    target VARCHAR(100) NOT NULL,
+    ip_address VARCHAR(45) NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 -- 7. Inserción de Roles Maestros
 INSERT INTO roles (name) VALUES ('admin'), ('client');
 
