@@ -64,8 +64,8 @@
       */
      async delete(id) 
      {
-         await db.execute('CALL sp_delete_user(?)', [id]);
-         return true;
+         const [rows] = await db.execute('CALL sp_delete_user(?)', [id]);
+         return rows[0][0].affectedRows > 0;
      }
  }
  
