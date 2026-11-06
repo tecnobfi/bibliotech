@@ -14,10 +14,10 @@
  * en lugar de detener la ejecución con un error fatal.
  */
 
--- Eliminar la base de datos completa
+/* Eliminar la base de datos completa*/
 DROP DATABASE IF EXISTS bibliotech;
 
--- Eliminar el usuario específico de la aplicación
+*/-- Eliminar el usuario específico de la aplicación*/
 DROP USER IF EXISTS 'bibliotech'@'localhost';
 
 /*

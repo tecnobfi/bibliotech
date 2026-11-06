@@ -73,6 +73,17 @@
          await db.execute('CALL sp_delete_book(?, ?)', [id, userId]);
          return true;
      }
+
+     async updateMetadata(id, userId, bookData){
+        const {title, author, category, pages} = bookData;
+
+        const [result] = await db.execute(
+            'CALL sp_update_book_metadata(?, ?, ?, ?, ?, ?)',
+            [id, userId, title, author, category, pages]
+        );
+        
+        return result;
+     }
  }
  
  module.exports = new BookRepository();
