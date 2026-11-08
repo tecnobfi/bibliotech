@@ -112,6 +112,37 @@
              next(error);
          }
      }
+
+     async updateBook(req, res, next) 
+    {
+        try 
+        {
+            const { id } = req.params;
+            const userId = req.userId;
+            const { title, author, category, pages } = req.body;
+
+            const updatedBook = await bookRepository.update(id, userId, {
+                title: String(title).trim(),
+                author: String(author).trim(),
+                category: String(category).trim(),
+                pages: parseInt(pages)
+            });
+
+        // Sin fila devuelta: el libro no existe o pertenece a otro usuario (se responde igual para no revelar cuál de los dos casos es)
+        if (!updatedBook) 
+        {
+            const message = i18n.getMessage('CT_BOOK_UPDATE_NOT_FOUND');
+            return res.status(404).json({ message });
+        }
+
+        const message = i18n.getMessage('CT_BOOK_UPDATED_SUCCESS');
+        res.json({ message, book: updatedBook });
+    }
+    catch (error)
+    {
+        next(error);
+    }
+    }
  }
  
  module.exports = new BookController();

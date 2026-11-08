@@ -117,7 +117,29 @@
              }
              return res.status(400).json({ message: error.message });
          }
-     }
+     },
+
+    validateBookUpdate: (req, res, next) => 
+    {
+        const validator = new Validator();
+        const { id } = req.params;
+        const { title, author, category, pages } = req.body || {};
+
+        try 
+        {
+            validator.validateThis(id).with(new PositiveNumber("CT_BOOK_ID_INVALID"));
+            validator.validateThis(title).with(new Required("CT_REQ_TITLE"));
+            validator.validateThis(author).with(new Required("CT_REQ_AUTHOR"));
+            validator.validateThis(category).with(new Required("CT_REQ_CATEGORY"));
+            validator.validateThis(pages).with(new PositiveNumber("CT_PAGES_POSITIVE"));
+
+            next();
+    } 
+    catch (error) 
+    {
+        return res.status(400).json({ message: error.message });
+    }
+    }
  };
  
  module.exports = validationMiddleware;
