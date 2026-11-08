@@ -73,6 +73,27 @@
          await db.execute('CALL sp_delete_book(?, ?)', [id, userId]);
          return true;
      }
+
+     /**
+      * @brief Actualiza los metadatos de un documento en la base de datos.
+      * @param {number} id - ID del documento que se desea modificar.
+      * @param {number} userId - ID del usuario propietario del documento.
+      * @param {Object} bookData - Objeto que contiene los nuevos metadatos.
+      * @param {string} bookData.title - Nuevo título del documento.
+      * @param {string} bookData.author - Nuevo autor del documento.
+      * @param {string} bookData.category - Nueva categoría del documento.
+      * @param {number} bookData.pages - Nueva cantidad de páginas.
+      * @returns {Promise<boolean>} Retorna true si la ejecución del procedimiento almacenado finalizó sin excepciones.
+      * @details Ejecuta el procedimiento almacenado sp_update_book mediante una consulta parametrizada.
+      */
+     async update(id, userId, bookData) 
+     {
+         const { title, author, category, pages } = bookData;
+
+         await db.execute('CALL sp_update_book(?, ?, ?, ?, ?, ?)', [id, userId, title, author, category, pages]);
+         return true;
+
+     }
  }
  
  module.exports = new BookRepository();

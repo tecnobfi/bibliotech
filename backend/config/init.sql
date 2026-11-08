@@ -207,6 +207,5 @@ CREATE PROCEDURE sp_delete_book(IN p_id INT, IN p_user_id INT)
 BEGIN
     DELETE FROM books WHERE id = p_id AND user_id = p_user_id;
 END //
-
 DELIMITER ;
 SET foreign_key_checks = 1;
