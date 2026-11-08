@@ -210,3 +210,49 @@ END //
 
 DELIMITER ;
 SET foreign_key_checks = 1;
+
+
+/*
+ *@brief Crear Tabla audit_logs
+ */
+
+ CREATE TABLE audit_logs (
+    INT id AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NULL,
+    action VARCHAR(100) NOT NULL,
+    target VARCHAR(255) NOT NULL,
+    ip_address VARCHAR(45) NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+ );
+
+
+ /*
+  *@brief Creacion de Stored Procedure sp_create_audit_log
+  */
+DELIMITER //
+CREATE PROCEDURE sp_create_audit_log(
+    IN p_user_id INT,
+    IN p_action VARCHAR(100),
+    IN p_target VARCHAR(255),
+    IN p_ip_address VARCHAR(45)
+)
+BEGIN
+
+    INSERT INTO audit_logs (
+        user_id,
+        action,
+        target,
+        ip_address
+    )
+    VALUES (
+        p_user_id,
+        p_action,
+        p_target,
+        p_ip_address
+    );
+
+END //
+
+DELIMITER ;
