@@ -73,6 +73,16 @@
          await db.execute('CALL sp_delete_book(?, ?)', [id, userId]);
          return true;
      }
+
+     async update(id, userId, bookData) 
+    {
+    const { title, author, category, pages } = bookData;
+    const [rows] = await db.execute('CALL sp_update_book_metadata(?, ?, ?, ?, ?, ?)',
+        [id, userId, title, author, category, pages]);
+
+    // El primer resultset contiene el SELECT final del SP: 1 fila si hubo coincidencia, 0 si no.
+    return rows[0][0];
+    }
  }
  
  module.exports = new BookRepository();
