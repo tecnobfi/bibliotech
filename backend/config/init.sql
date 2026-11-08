@@ -208,5 +208,24 @@ BEGIN
     DELETE FROM books WHERE id = p_id AND user_id = p_user_id;
 END //
 
+CREATE PROCEDURE sp_update_book_metadata(
+       IN p_id INT,
+       IN p_user_id INT,
+       IN p_title VARCHAR(100),
+       IN p_author VARCHAR(100),
+       IN p_category VARCHAR(50),
+       IN p_pages INT
+   )
+   BEGIN
+       UPDATE books
+       SET title = p_title,
+           author = p_author,
+           category = p_category,
+           pages = p_pages
+       WHERE id = p_id AND user_id = p_user_id;
+
+       SELECT * FROM books WHERE id = p_id AND user_id = p_user_id;
+   END //
+
 DELIMITER ;
 SET foreign_key_checks = 1;
