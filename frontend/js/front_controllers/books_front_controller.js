@@ -68,6 +68,14 @@
          tdReading.appendChild(linkDownload);
  
          const tdActions = document.createElement('td');
+         const btnEdit = document.createElement('button');
+         btnEdit.className = 'w3-button w3-amber w3-tiny w3-round w3-margin-right';
+         btnEdit.textContent = 'Editar';
+         btnEdit.addEventListener('click', () => 
+        {
+            openEditBook(b);
+        });
+         tdActions.appendChild(btnEdit);
          const btnDelete = document.createElement('button');
          btnDelete.className = 'w3-button w3-red w3-tiny w3-round';
          btnDelete.textContent = 'Borrar';
@@ -99,6 +107,18 @@
      {
          showModal('Error', error.message);
      }
+ }
+
+ function openEditBook(book) 
+ {
+    showEditBookModal(book, (data) => updateBook(book.id, data));
+ }
+
+ async function updateBook(id, data) 
+ {
+    await apiService.request(`/books/${id}`, 'PUT', data);
+    showModal('Actualizado', 'Los metadatos del documento se actualizaron correctamente.');
+    loadBooks();
  }
  
  const uploadForm = document.getElementById('uploadForm');
