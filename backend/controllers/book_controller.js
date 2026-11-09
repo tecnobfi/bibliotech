@@ -112,6 +112,42 @@
              next(error);
          }
      }
+
+     /**
+      * @brief Gestiona la actualización de los metadatos de un documento.
+      * @param {Object} req - Objeto de petición HTTP con el ID y los nuevos metadatos.
+      * @param {Object} res - Objeto de respuesta HTTP.
+      * @param {Function} next - Función para transferir los errores al middleware global.
+      * @details Obtiene el ID del documento desde req.params, los nuevos metadatos
+      * desde req.body y el ID del usuario autenticado desde req.userId.
+      * Luego invoca al repositorio para realizar la actualización y devuelve
+      * una respuesta al cliente.
+      * @returns {Promise<void>} No devuelve un valor directamente; envía la respuesta HTTP.
+      */
+     async updateBook(req,res,next) 
+     {
+         try
+         {
+            const{ id } = req.params;
+            const { title, author, category, pages } = req.body;
+            const userId = req.userId;
+
+            await bookRepository.update(id, userId, {
+                title,
+                author,
+                category,
+                pages: parseInt(pages)
+            });
+
+            const message = i18n.getMessage('CT_BOOK_UPDATE_SUCCESS');
+
+            res.json({ message });
+         }
+         catch (error)
+         {
+             next(error);
+         }
+     }
  }
  
  module.exports = new BookController();

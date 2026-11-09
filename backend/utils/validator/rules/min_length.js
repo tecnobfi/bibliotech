@@ -7,7 +7,8 @@
  * @date Octubre 2026
  */
 
- class MinLength {
+ class MinLength 
+ {
     /**
      * @param {number} minLength - Cantidad mínima de caracteres exigidos.
      * @param {string} messageName - Clave del diccionario de traducciones.
@@ -27,7 +28,8 @@
 
     validate(target) 
     {
-        if (!this.evaluate(target)) {
+        if (!this.evaluate(target)) 
+        {
             const message = this.validator.i18n.getMessage(this._messageName);
             throw new Error(message);
         }
