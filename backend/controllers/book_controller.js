@@ -28,7 +28,7 @@
      {
          try 
          {
-             const { title, author, category, pages } = req.body;
+             const { title, author, category: categoryId, pages } = req.body;
              const userId = req.userId;
              const filename = req.file.filename;
              const filePath = `/uploads/${filename}`;

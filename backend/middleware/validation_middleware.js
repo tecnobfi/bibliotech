@@ -86,7 +86,7 @@
      validateBookUpload: (req, res, next) => 
      {
          const validator = new Validator();
-         const { title, author, category, pages } = req.body;
+         const { title, author, categoryId: category, pages } = req.body;
  
          try 
          {
