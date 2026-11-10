@@ -36,14 +36,16 @@
                     <label class="w3-margin-top w3-show">Autor</label>
                     <input class="w3-input w3-border w3-round w3-transparent w3-text-white" type="text" id="author" required>
 
-                    <label class="w3-margin-top w3-show">Categoría</label>
-                    <select class="w3-select w3-border w3-round w3-black w3-text-white" id="category">
-                        <option value="Novela">Novela</option>
-                        <option value="Ciencia Ficción">Ciencia Ficción</option>
-                        <option value="Técnico / Académico">Técnico / Académico</option>
-                        <option value="Historia">Historia</option>
-                        <option value="Poesía">Poesía</option>
-                    </select>
+                   <!--
+                    * @brief Selector dinámico de categorías.
+                    * @details Las opciones se obtienen desde la API
+                    * y se generan mediante books_front_controller.js.
+                   -->
+                  <label class="w3-margin-top w3-show">Categoría</label>
+                  <select class="w3-select w3-border w3-round w3-black w3-text-white"
+                          id="category"
+                          required>
+</select>
 
                     <label class="w3-margin-top w3-show">Páginas</label>
                     <input class="w3-input w3-border w3-round w3-transparent w3-text-white" type="number" id="pages" value="10" min="1" required>

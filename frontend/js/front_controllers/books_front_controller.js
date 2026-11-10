@@ -7,7 +7,60 @@
  * @date Octubre 2026
  */
 
- document.addEventListener('DOMContentLoaded', loadBooks);
+document.addEventListener('DOMContentLoaded', () =>
+{
+    loadBooks();
+    loadCategories();
+});
+
+/**
+ * @brief Carga las categorías desde la API.
+ * @details Genera dinámicamente las opciones del selector
+ * utilizando manipulación nativa del DOM para prevenir XSS.
+ */
+async function loadCategories()
+{
+    const select = document.getElementById('category');
+
+    if (!select)
+    {
+        return;
+    }
+
+    select.disabled = true;
+    select.replaceChildren();
+
+    try
+    {
+        const categories = await apiService.request('/categories', 'GET');
+
+        const defaultOption = document.createElement('option');
+        defaultOption.value = '';
+        defaultOption.textContent = 'Seleccione una categoría';
+        defaultOption.selected = true;
+        defaultOption.disabled = true;
+
+        select.appendChild(defaultOption);
+
+        categories.forEach((category) =>
+        {
+            const option = document.createElement('option');
+
+            option.value = category.id;
+            option.textContent = category.name;
+
+            select.appendChild(option);
+        });
+
+        select.disabled = false;
+    }
+    catch (error)
+    {
+        showModal('Error', 'No se pudieron cargar las categorías: ' + error.message);
+    }
+}
+
+
 
  async function loadBooks() 
  {
@@ -77,12 +130,21 @@
          btnEdit.className = 'w3-button w3-blue w3-tiny w3-round w3-margin-right';
          btnEdit.textContent = 'Editar';
 
-         btnEdit.addEventListener('click', () =>
+         btnEdit.addEventListener('click', async () =>
         { 
-           showEditBookModal(b, async (bookData) =>
-           {
-            await updateBook(b.id, bookData);
-           });
+            try
+            {
+                 const categories = await apiService.request('/categories', 'GET');
+
+                showEditBookModal(b, async (bookData) =>
+                 {
+                   await updateBook(b.id, bookData);
+                 }, categories);
+            } 
+             catch (error)
+              {
+               showModal('Error', 'No se pudieron cargar las categorías: ' + error.message);
+              }
         });
 
         tdActions.appendChild(btnEdit);
@@ -157,7 +219,7 @@ async function updateBook(id, bookData)
         const formData = new FormData();
         formData.append('title', document.getElementById('title').value);
         formData.append('author', document.getElementById('author').value);
-        formData.append('category', document.getElementById('category').value);
+        formData.append('categoryId', document.getElementById('category').value);
         formData.append('pages', document.getElementById('pages').value);
         
         // files[0] accede al binario crudo del archivo seleccionado en el input de tipo file

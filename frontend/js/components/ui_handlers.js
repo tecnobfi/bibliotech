@@ -136,14 +136,18 @@
      modal.style.display = 'block';
  }
 
- //frontend requerimiento A
+ //frontend requerimiento A + requerimiento C
 
  /**
  * @brief Construye un modal para editar los metadatos de un libro.
+ * @details permite modificar los metadatos y seleccionar una categoria
+ * desde la base de datos
+ * 
  * @param {Object} book - Libro que queremos editar. Book es un objeto que contiene los datos del libro
  * @param {Function} onSave - Función que guardará los cambios. 
+ * @param {Array} categories - Categorías disponibles.
  */
-function showEditBookModal(book, onSave)//estructura modal para crear y mostrar una ventana para editar los datos de un libro.
+function showEditBookModal(book, onSave,categories)//estructura modal para crear y mostrar una ventana para editar los datos de un libro.
 {
 
       // Evitamos crear dos ventanas de edición al mismo tiempo.
@@ -170,7 +174,7 @@ function showEditBookModal(book, onSave)//estructura modal para crear y mostrar 
 
     content.appendChild(title);
 
-    // Crear el formulario.
+    //Crear el formulario.
     const form = document.createElement('form');
 
     /**
@@ -197,16 +201,40 @@ function showEditBookModal(book, onSave)//estructura modal para crear y mostrar 
         return input;
     }
 
-    // Crear los cuatro campos de edición.
-    const inputTitle = createField('Título', book.title, 'text');
-    const inputAuthor = createField('Autor', book.author, 'text');
-    const inputCategory = createField('Categoría', book.category, 'text');
-    const inputPages = createField('Páginas', book.pages, 'number');
+    // Crear los campos de edición.
+const inputTitle = createField('Título', book.title, 'text');
+const inputAuthor = createField('Autor', book.author, 'text');
+
+// Crear el selector dinámico de categorías.
+const labelCategory = document.createElement('label');
+labelCategory.textContent = 'Categoría';
+
+const selectCategory = document.createElement('select');
+selectCategory.className = 'w3-select w3-border w3-margin-bottom';
+selectCategory.required = true;
+
+categories.forEach((category) =>
+{
+    const option = document.createElement('option');
+    option.value = category.id;
+    option.textContent = category.name;
+
+    if (Number(book.category_id) === Number(category.id))
+    {
+        option.selected = true;
+    }
+
+    selectCategory.appendChild(option);
+});
+
+form.appendChild(labelCategory);
+form.appendChild(selectCategory);
+
+const inputPages = createField('Páginas', book.pages, 'number');
 
     // Establecer límites de los campos.
     inputTitle.maxLength = 100;
     inputAuthor.maxLength = 100;
-    inputCategory.maxLength = 50;
     inputPages.min = '0';
     inputPages.step = '1';
 
@@ -235,16 +263,16 @@ function showEditBookModal(book, onSave)//estructura modal para crear y mostrar 
 
         // Obtener los valores ingresados por el usuario.
         const bookData = {
-            title: inputTitle.value.trim(),
-            author: inputAuthor.value.trim(),
-            category: inputCategory.value.trim(),
-            pages: Number(inputPages.value)
+           title: inputTitle.value.trim(),
+           author: inputAuthor.value.trim(),
+           categoryId: Number(selectCategory.value),
+           pages: Number(inputPages.value)
         };
 
-        // Validar los datos antes de enviarlos.
-        if (!bookData.title || !bookData.author || !bookData.category ||
-            inputPages.value.trim() === '' ||
-            !Number.isInteger(bookData.pages) || bookData.pages < 0)
+        // Validar los datos antes de enviarlos. 
+     if (!bookData.title || !bookData.author || !Number.isInteger(bookData.categoryId) ||
+         bookData.categoryId <= 0 || inputPages.value.trim() === '' || !Number.isInteger(bookData.pages) ||
+         bookData.pages < 0)
         {
             showModal('Error', 'Los datos ingresados no son válidos.');
             return;
@@ -275,7 +303,7 @@ function showEditBookModal(book, onSave)//estructura modal para crear y mostrar 
     form.appendChild(btnCancel);
 
      //une todos los elementos
-    content.appendChild(form);//Coloca el título dentro del contenedor.
+    content.appendChild(form);//muestra el formulario.
     modal.appendChild(content);
     document.body.appendChild(modal);//Agrega el modal a la página web.
 
