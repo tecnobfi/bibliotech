@@ -68,6 +68,26 @@
          tdReading.appendChild(linkDownload);
  
          const tdActions = document.createElement('td');
+
+         //FRONTEND REQUERIMIENTO A (agregar el boton editar de ui_handlers)
+         /**
+         * @brief Crea el botón para editar los metadatos de un libro.
+         */
+         const btnEdit = document.createElement('button');
+         btnEdit.className = 'w3-button w3-blue w3-tiny w3-round w3-margin-right';
+         btnEdit.textContent = 'Editar';
+
+         btnEdit.addEventListener('click', () =>
+        { 
+           showEditBookModal(b, async (bookData) =>
+           {
+            await updateBook(b.id, bookData);
+           });
+        });
+
+        tdActions.appendChild(btnEdit);
+        //boton editar creado
+
          const btnDelete = document.createElement('button');
          btnDelete.className = 'w3-button w3-red w3-tiny w3-round';
          btnDelete.textContent = 'Borrar';
@@ -100,7 +120,21 @@
          showModal('Error', error.message);
      }
  }
- 
+//frontend requerimiento A
+ /**
+ * @brief Actualiza los metadatos de un libro mediante una petición PUT.
+ * @param {number} id - Identificador del libro.
+ * @param {Object} bookData - Datos modificados del libro.
+ */
+async function updateBook(id, bookData)
+{
+    await apiService.request(`/books/${id}`, 'PUT', bookData);
+
+    await loadBooks();
+
+    showModal('Éxito', 'Los metadatos del libro se actualizaron correctamente.');
+}
+ //fin de la funcion requermimiento A
  const uploadForm = document.getElementById('uploadForm');
  
  if (uploadForm) 
