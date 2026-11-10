@@ -65,20 +65,38 @@ CREATE TABLE users_roles (
     FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE
 );
 
-/*
- * @brief 6. Tabla de Libros/Documentos (Relación 1:N con Usuarios)
+/*requerimiento C*/
+/**
+ * @brief Crea la tabla de categorías.
+ * @details Se normalizan las categorías para evitar
+ * almacenar nombres repetidos en la tabla books.
  */
-CREATE TABLE books (
+CREATE TABLE categories (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL UNIQUE
+);
+
+//**
+ * @brief Tabla de libros/documentos.
+ * @details Cada libro pertenece a un usuario y a una categoría.
+ * Se utiliza category_id como clave foránea para evitar
+ * almacenar categorías repetidas como texto.
+ */
+CREATE TABLE books
+(
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
     filename VARCHAR(255) NOT NULL,
     title VARCHAR(100) NOT NULL,
     author VARCHAR(100) NOT NULL,
-    category VARCHAR(50),
+    category_id INT NOT NULL,
     pages INT DEFAULT 0,
     file_path VARCHAR(255) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+   --agrego clave foranea de category
+    CONSTRAINT fk_books_category FOREIGN KEY (category_id) REFERENCES categories(id)
 );
 
 -- 7. Inserción de Roles Maestros
@@ -174,49 +192,89 @@ CREATE PROCEDURE sp_create_book(
     IN p_filename VARCHAR(255),
     IN p_title VARCHAR(100),
     IN p_author VARCHAR(100),
-    IN p_category VARCHAR(50),
+    IN p_category_id INT,
     IN p_pages INT,
     IN p_file_path VARCHAR(255)
 )
 BEGIN
-    INSERT INTO books (user_id, filename, title, author, category, pages, file_path)
-    VALUES (p_user_id, p_filename, p_title, p_author, p_category, p_pages, p_file_path);
+    INSERT INTO books (user_id, filename, title, author, category_id, pages, file_path)
+    VALUES (p_user_id, p_filename, p_title, p_author, p_category_id, p_pages, p_file_path);
     SELECT LAST_INSERT_ID() as insertId;
 END //
 
--- Listar libros asociados a un usuario específico
+/**
+ * @brief Lista los libros asociados a un usuario.
+ * @details Utiliza INNER JOIN para obtener el nombre
+ * de la categoría desde la tabla categories,
+ * manteniendo la normalización de la base de datos.
+ *
+ * @param p_user_id Identificador del usuario.
+ */
 CREATE PROCEDURE sp_find_books_by_user(IN p_user_id INT)
 BEGIN
-    SELECT * FROM books WHERE user_id = p_user_id;
+    SELECT b.*,
+    c.name AS category
+    FROM books b
+    INNER JOIN categories c
+    ON b.category_id = c.id
+    WHERE b.user_id = p_user_id;
 END //
 
-/*
- * @brief Busca un libro específico (Validando autoría)
- * @note Seguridad: Se exige el p_user_id para evitar que un cliente modifique 
- * un id en la URL y acceda a un libro que no le pertenece (Insecure Direct Object Reference).
+/**
+ * @brief Busca un libro por su identificador.
+ * @details Obtiene los datos de un libro perteneciente
+ * al usuario indicado, incluyendo el nombre de su
+ * categoría mediante un INNER JOIN.
+ *
+ * @param p_id Identificador del libro.
+ * @param p_user_id Identificador del usuario.
  */
-CREATE PROCEDURE sp_find_book_by_id(IN p_id INT, IN p_user_id INT)
+CREATE PROCEDURE sp_find_book_by_id(
+    IN p_id INT,
+    IN p_user_id INT
+)
 BEGIN
-    SELECT * FROM books WHERE id = p_id AND user_id = p_user_id;
+    SELECT b.*,
+    c.name AS category
+    FROM books b
+    INNER JOIN categories c
+    ON b.category_id = c.id
+    WHERE b.id = p_id AND b.user_id = p_user_id;
 END //
 
-
+/**
+ REQUERMINIENTO A + AGREGADO DE P_CATEGORY_ID (REQ C)
+ * @brief Actualiza los metadatos de un libro.
+ * @details Permite modificar el título, autor, categoría
+ * y cantidad de páginas de un libro perteneciente
+ * al usuario indicado.
+ * La categoría se identifica mediante una clave foránea
+ * para mantener la integridad referencial.
+ *
+ * @param p_id Identificador del libro.
+ * @param p_user_id Identificador del usuario propietario.
+ * @param p_title Nuevo título del libro.
+ * @param p_author Nuevo autor del libro.
+ * @param p_category_id Identificador de la nueva categoría.
+ * @param p_pages Nueva cantidad de páginas.
+ */
 CREATE PROCEDURE sp_update_book_metadata(
     IN p_id INT,
     IN p_user_id INT,
     IN p_title VARCHAR(100),
     IN p_author VARCHAR(100),
-    IN p_category VARCHAR(50),
+    IN p_category_id INT,
     IN p_pages INT
 )
 BEGIN
     UPDATE books
     SET title = p_title,
         author = p_author,
-        category = p_category,
+        category_id = p_category_id,
         pages = p_pages
     WHERE id = p_id AND user_id = p_user_id;
 END //
+
 
 /*
  * @brief Borrar libro (Validando autoría)
@@ -270,6 +328,38 @@ BEGIN
         p_ip_address
     );
 
+END //
+
+DELIMITER ;
+
+
+
+/**
+ * @brief Inserta las categorías iniciales.
+ * @details Permite disponer de cinco categorías
+ * por defecto al inicializar la base de datos.
+ */
+INSERT INTO categories (name)
+VALUES
+    ('Ficción'),
+    ('Ciencia'),
+    ('Historia'),
+    ('Tecnología'),
+    ('Fantasía');
+
+DELIMITER //
+
+/**
+ * @brief Obtiene todas las categorías disponibles.
+ * @details Centraliza la consulta de categorías
+ * mediante un procedimiento almacenado y devuelve
+ * los resultados ordenados alfabéticamente.
+ */
+CREATE PROCEDURE sp_get_all_categories()
+BEGIN
+    SELECT id, name
+    FROM categories
+    ORDER BY name ASC;
 END //
 
 DELIMITER ;
