@@ -234,7 +234,7 @@ SET foreign_key_checks = 1;
  */
 
  CREATE TABLE audit_logs (
-    INT id AUTO_INCREMENT PRIMARY KEY,
+    id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NULL,
     action VARCHAR(100) NOT NULL,
     target VARCHAR(255) NOT NULL,
