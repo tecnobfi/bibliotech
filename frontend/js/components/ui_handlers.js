@@ -275,7 +275,7 @@ function showEditBookModal(book, onSave)//estructura modal para crear y mostrar 
     form.appendChild(btnCancel);
 
      //une todos los elementos
-    content.appendChild(title);//Coloca el título dentro del contenedor.
+    content.appendChild(form);//Coloca el título dentro del contenedor.
     modal.appendChild(content);
     document.body.appendChild(modal);//Agrega el modal a la página web.
 
