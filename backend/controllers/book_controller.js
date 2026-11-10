@@ -10,7 +10,8 @@
  const fileHelper = require('../utils/file_helper/file_helper');
  const bookRepository = require('../repositories/book_repository');
  const i18n = require('../utils/i18n/i18n'); // Inyección del gestor de idiomas
- 
+ const auditRepository = require('../repositories/audit_repository');
+
  /**
   * @class BookController
   * @brief Administra la interacción del cliente con su biblioteca privada.
@@ -82,36 +83,44 @@
       * @param {Object} res - Respuesta HTTP.
       * @param {Function} next - Función para delegar errores.
       */
-     async deleteBook(req, res, next) 
-     {
-         try 
-         {
-             const { id } = req.params;
-             const userId = req.userId;
- 
-             // Obtener información del libro para validar propiedad y conocer ruta física
-             const book = await bookRepository.findById(id, userId);
-             
-             if (!book) 
-             {
-                 const message = i18n.getMessage('CT_BOOK_NOT_FOUND');
-                 return res.status(404).json({ message });
-             }
- 
-             // Eliminar registro en base de datos
-             await bookRepository.delete(id, userId);
- 
-             // Eliminar archivo físico en disco de forma síncrona
-             fileHelper.deleteFile(book.file_path); 
-             
-             const message = i18n.getMessage('CT_BOOK_DELETED_SUCCESS');
-             res.json({ message });
-         }
-         catch (error)
-         {
-             next(error);
-         }
-     }
+    async deleteBook(req, res, next) 
+    {
+       try 
+       {
+        const { id } = req.params;
+        const userId = req.userId;
+
+        // Obtener información del libro para validar propiedad
+        const book = await bookRepository.findById(id, userId);
+
+        if (!book) 
+        {
+            const message = i18n.getMessage('CT_BOOK_NOT_FOUND');
+            return res.status(404).json({ message });
+        }
+
+        // Eliminar registro en base de datos
+        await bookRepository.delete(id, userId);
+
+        // Registrar la acción en la tabla audit_logs
+        await auditRepository.create(
+            userId,
+            'DELETE_BOOK',
+            `BOOK:${id}`,
+            req.ip || null
+        );
+
+        // Eliminar archivo físico en disco
+        fileHelper.deleteFile(book.file_path); 
+
+        const message = i18n.getMessage('CT_BOOK_DELETED_SUCCESS');
+        res.json({ message });
+        }
+        catch (error)
+        {
+          next(error);
+        }
+    }
 
      /**
       * @brief Gestiona la actualización de los metadatos de un documento.
