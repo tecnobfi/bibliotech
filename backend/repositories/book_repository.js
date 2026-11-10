@@ -88,9 +88,9 @@
       */
      async update(id, userId, bookData) 
      {
-         const { title, author, category, pages } = bookData;
+         const { title, author, categoryId, pages } = bookData;
 
-         await db.execute('CALL sp_update_book_metadata(?, ?, ?, ?, ?, ?)', [id, userId, title, author, category, pages]);
+         await db.execute('CALL sp_update_book_metadata(?, ?, ?, ?, ?, ?)', [id, userId, title, author, categoryId, pages]);
          return true;
 
      }
