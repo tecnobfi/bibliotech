@@ -80,10 +80,12 @@
              );
 
              // Limpieza física: Eliminar almacenamiento en disco
-             userBooks.forEach(book => {
-                 fileHelper.deleteFile(book.file_path);
-             });
+             userBooks.forEach(book => {fileHelper.deleteFile(book.file_path);});
 
+             // Reemplazo dinámico (%s) para mostrar la cantidad de archivos borrados
+             const message = i18n.getMessage('CT_ADMIN_USER_DELETED').replace('%s', userBooks.length);
+             res.json({ message });
+             
          } 
          catch (error) 
          {
