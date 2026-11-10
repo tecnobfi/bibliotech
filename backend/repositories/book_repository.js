@@ -90,7 +90,7 @@
      {
          const { title, author, category, pages } = bookData;
 
-         await db.execute('CALL sp_update_book(?, ?, ?, ?, ?, ?)', [id, userId, title, author, category, pages]);
+         await db.execute('CALL sp_update_book_metadata(?, ?, ?, ?, ?, ?)', [id, userId, title, author, category, pages]);
          return true;
 
      }
