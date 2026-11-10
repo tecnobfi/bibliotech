@@ -26,5 +26,6 @@
     "CT_AUTH_LOGIN_SUCCESS": "Login exitoso.",
     "CT_BOOK_UPLOAD_SUCCESS": "Documento PDF cargado exitosamente en la biblioteca.",
     "CT_BOOK_NOT_FOUND": "El documento no existe o no tienes permisos para eliminarlo.",
-    "CT_BOOK_DELETED_SUCCESS": "Registro eliminado y archivo físico removido con éxito."
+    "CT_BOOK_DELETED_SUCCESS": "Registro eliminado y archivo físico removido con éxito.", 
+    "CT_BOOK_UPDATE_SUCCESS": "Documento actualizado correctamente"
 }

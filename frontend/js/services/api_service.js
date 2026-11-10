@@ -60,7 +60,8 @@
  
          // Fetch API: El estándar moderno de JavaScript para peticiones de red
          const response = await fetch(`${API_URL}${endpoint}`, config);
-         const result = await response.json();
+         const text = await response.text();
+         const result = text ? JSON.parse(text) : {};
  
          // Control Centralizado de Expiración de Sesión (Cierre automático)
          if (response.status === 401) 
