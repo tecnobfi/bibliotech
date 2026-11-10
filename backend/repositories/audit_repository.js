@@ -7,7 +7,7 @@
  * @date Octubre 2026
  */
 
-const db = require('../config.db');
+const db = require('../config/db');
 
 /**
  * @class AuditRepository
