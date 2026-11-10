@@ -76,7 +76,7 @@ CREATE TABLE categories (
     name VARCHAR(100) NOT NULL UNIQUE
 );
 
-//**
+/**
  * @brief Tabla de libros/documentos.
  * @details Cada libro pertenece a un usuario y a una categoría.
  * Se utiliza category_id como clave foránea para evitar
@@ -95,8 +95,8 @@ CREATE TABLE books
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-   --agrego clave foranea de category
-    CONSTRAINT fk_books_category FOREIGN KEY (category_id) REFERENCES categories(id)
+   -- agrego clave foranea de category
+    FOREIGN KEY (category_id) REFERENCES categories(id)
 );
 
 -- 7. Inserción de Roles Maestros
@@ -315,18 +315,8 @@ CREATE PROCEDURE sp_create_audit_log(
 )
 BEGIN
 
-    INSERT INTO audit_logs (
-        user_id,
-        action,
-        target,
-        ip_address
-    )
-    VALUES (
-        p_user_id,
-        p_action,
-        p_target,
-        p_ip_address
-    );
+    INSERT INTO audit_logs (user_id,action,target,ip_address) VALUES 
+    (p_user_id, p_action,p_target,p_ip_address);
 
 END //
 
@@ -339,8 +329,7 @@ DELIMITER ;
  * @details Permite disponer de cinco categorías
  * por defecto al inicializar la base de datos.
  */
-INSERT INTO categories (name)
-VALUES
+INSERT INTO categories (name)VALUES
     ('Ficción'),
     ('Ciencia'),
     ('Historia'),

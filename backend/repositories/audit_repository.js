@@ -1,11 +1,11 @@
 /**
- * @file book_repository.js
- * @brief Repositorio para la capa de acceso a datos de documentos PDF.
- * @project Bibliotech
- * @author Tecnologías Informáticas B - Facultad de Ingeniería - UNMdP
- * @license http://www.gnu.org/licenses/gpl.txt GNU GPL 3.0
- * @date Octubre 2026
- */
+*@file audit_repository.js
+*@brief Repositorio para la capa de acceso a datos de los registros de auditoría.
+*@project Bibliotech
+*@author Tecnologías Informáticas B - Facultad de Ingeniería - UNMDP
+*@license http://www.gnu.org/licenses/gpl.txt GNU GPL 3.0
+*@date Noviembre 2026
+*/
 
 const db = require('../config/db');
 

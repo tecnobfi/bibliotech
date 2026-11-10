@@ -7,7 +7,7 @@
  * @date Noviembre 2026
  */
 
-const db = required('../config/db');
+const db = require('../config/db');
 
 /**
  * @class CategoriesRepository
