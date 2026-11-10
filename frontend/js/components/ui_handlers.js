@@ -15,7 +15,7 @@
  * @param {string} title - Título del cuadro de diálogo.
  * @param {string} message - Mensaje o cuerpo de la alerta.
  */
- function showModal(title, message) 
+ function showModal(title, message)//muestra mensajes
  {
      let modal = document.getElementById('msgModal');
  
@@ -73,7 +73,7 @@
   * @param {string} title - Título del documento.
   * @param {string} pdfUrl - Ruta física del archivo en el servidor.
   */
- function showPdfModal(title, pdfUrl) 
+ function showPdfModal(title, pdfUrl)//permite ver el PDF 
  {
      let modal = document.getElementById('pdfModal');
  
@@ -135,3 +135,149 @@
      document.getElementById('pdfIframe').src = pdfUrl;
      modal.style.display = 'block';
  }
+
+ //frontend requerimiento A
+
+ /**
+ * @brief Construye un modal para editar los metadatos de un libro.
+ * @param {Object} book - Libro que queremos editar. Book es un objeto que contiene los datos del libro
+ * @param {Function} onSave - Función que guardará los cambios. 
+ */
+function showEditBookModal(book, onSave)//estructura modal para crear y mostrar una ventana para editar los datos de un libro.
+{
+
+      // Evitamos crear dos ventanas de edición al mismo tiempo.
+    const previousModal = document.getElementById('editBookModal');
+
+    if (previousModal)
+    {
+        previousModal.remove();
+    }
+
+    //crear el modal
+    const modal = document.createElement('div'); //Crea un elemento HTML div desde JavaScript.
+    modal.id = 'editBookModal';//le asignamos un identificador
+    modal.className = 'w3-modal';//Le asigna una clase CSS para que se comporte visualmente como una ventana modal.
+   
+    //crear el contenido del modal
+    const content = document.createElement('div');
+    content.className = 'w3-modal-content w3-card-4 w3-padding vault-card';
+    content.style.maxWidth = '450px';
+
+    //crea el titulo
+    const title = document.createElement('h3');
+    title.textContent = 'Editar documento';
+
+    content.appendChild(title);
+
+    // Crear el formulario.
+    const form = document.createElement('form');
+
+    /**
+     * @brief Crea un campo de entrada con su etiqueta.
+     * @param {string} labelText - Texto de la etiqueta.
+     * @param {string|number} value - Valor inicial.
+     * @param {string} type - Tipo de input.
+     * @returns {HTMLInputElement} Campo creado.
+     */
+    function createField(labelText, value, type)
+    {
+        const label = document.createElement('label');
+        label.textContent = labelText;
+
+        const input = document.createElement('input');
+        input.className = 'w3-input w3-border w3-margin-bottom';
+        input.type = type;
+        input.value = value ?? '';
+        input.required = true;
+
+        form.appendChild(label);
+        form.appendChild(input);
+
+        return input;
+    }
+
+    // Crear los cuatro campos de edición.
+    const inputTitle = createField('Título', book.title, 'text');
+    const inputAuthor = createField('Autor', book.author, 'text');
+    const inputCategory = createField('Categoría', book.category, 'text');
+    const inputPages = createField('Páginas', book.pages, 'number');
+
+    // Establecer límites de los campos.
+    inputTitle.maxLength = 100;
+    inputAuthor.maxLength = 100;
+    inputCategory.maxLength = 50;
+    inputPages.min = '0';
+    inputPages.step = '1';
+
+    // Crear el botón Guardar.
+    const btnSave = document.createElement('button');
+    btnSave.textContent = 'Guardar cambios';
+    btnSave.className = 'w3-button w3-teal w3-margin-right';
+    btnSave.type = 'submit';
+
+    // Crear el botón Cancelar.
+    const btnCancel = document.createElement('button');
+    btnCancel.textContent = 'Cancelar';
+    btnCancel.className = 'w3-button w3-grey';
+    btnCancel.type = 'button';
+
+    // Cerrar el modal sin guardar.
+    btnCancel.addEventListener('click', () =>
+    {
+        modal.remove();
+    });
+
+    // Guardar los datos modificados.
+    form.addEventListener('submit', async (e) =>
+    {
+        e.preventDefault();
+
+        // Obtener los valores ingresados por el usuario.
+        const bookData = {
+            title: inputTitle.value.trim(),
+            author: inputAuthor.value.trim(),
+            category: inputCategory.value.trim(),
+            pages: Number(inputPages.value)
+        };
+
+        // Validar los datos antes de enviarlos.
+        if (!bookData.title || !bookData.author || !bookData.category ||
+            inputPages.value.trim() === '' ||
+            !Number.isInteger(bookData.pages) || bookData.pages < 0)
+        {
+            showModal('Error', 'Los datos ingresados no son válidos.');
+            return;
+        }
+
+        btnSave.disabled = true;
+
+        try
+        {
+            // Ejecutar la función recibida como parámetro.
+            await onSave(bookData);
+
+            // Cerrar el modal si se guardó correctamente.
+            modal.remove();
+        }
+        catch (error)
+        {
+            showModal('Error', error.message);
+        }
+        finally
+        {
+            btnSave.disabled = false;
+        }
+    });
+
+    // Agregar los botones al formulario.
+    form.appendChild(btnSave);
+    form.appendChild(btnCancel);
+
+     //une todos los elementos
+    content.appendChild(title);//Coloca el título dentro del contenedor.
+    modal.appendChild(content);
+    document.body.appendChild(modal);//Agrega el modal a la página web.
+
+    modal.style.display = 'block';//Hace que el modal se muestre.
+}
