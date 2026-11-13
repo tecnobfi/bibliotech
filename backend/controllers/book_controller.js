@@ -112,22 +112,22 @@
              next(error);
          }
      }
-     async updateBookMetadata(req, res, next) {
-        try {
-            const bookId = req.params.id;
-            const userId = req.user.id; // Asume que el middleware de autenticación inyecta req.user
-            const { title, author, pages, category } = req.body;
+ async updateBookMetadata(req, res, next) {
+         try {
+             const bookId = req.params.id;
+             const userId = req.userId; // Corregido para usar req.userId al igual que el resto del controlador
+             const { title, author, pages, category } = req.body;
 
-            await bookRepository.updateMetadata(bookId, userId, { title, author, pages, category });
+             await bookRepository.updateMetadata(bookId, userId, { title, author, pages, category });
 
-            return res.status(200).json({
-                success: true,
-                message: 'Metadatos del libro actualizados correctamente.'
-            });
-        } catch (error) {
-            next(error);
-        }
-    }
+             return res.status(200).json({
+                 success: true,
+                 message: 'Metadatos del libro actualizados correctamente.'
+             });
+         } catch (error) {
+             next(error);
+         }
+     }
  }
  
  module.exports = new BookController();
