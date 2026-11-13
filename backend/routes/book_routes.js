@@ -1,4 +1,4 @@
-//**
+/**
  * @file book_routes.js
  * @brief Rutas de la API para la gestión documental de libros PDF.
  * @project Bibliotech
