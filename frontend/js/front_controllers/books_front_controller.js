@@ -7,7 +7,50 @@
  * @date Octubre 2026
  */
 
- document.addEventListener('DOMContentLoaded', loadBooks);
+  document.addEventListener('DOMContentLoaded', initDashboard);
+
+ /**
+  * @brief Arranque del dashboard: primero categorías, luego libros.
+  * @details El orden importa: el modal de edición copia las opciones del <select id="category">.
+  */
+ async function initDashboard() 
+ {
+     await loadCategories();
+     await loadBooks();
+ }
+
+ /**
+  * @brief Pide las categorías a la API e inyecta una <option> por cada una.
+  * @details Zero-innerHTML: createElement + textContent, así un nombre con HTML se muestra
+  * como texto plano y nunca se ejecuta (prevención de XSS). El value es el id.
+  */
+ async function loadCategories() 
+ {
+     const select = document.getElementById('category');
+
+     if (!select) 
+     {
+         return;
+     }
+
+     try 
+     {
+         const categories = await apiService.request('/categories', 'GET');
+         select.replaceChildren();
+
+         categories.forEach(c => 
+         {
+             const option = document.createElement('option');
+             option.value = c.id;
+             option.textContent = c.name;
+             select.appendChild(option);
+         });
+     } 
+     catch (error) 
+     {
+         showModal('Error', 'No se pudieron cargar las categorías: ' + error.message);
+     }
+ }
 
  async function loadBooks() 
  {
@@ -143,7 +186,7 @@
         const formData = new FormData();
         formData.append('title', document.getElementById('title').value);
         formData.append('author', document.getElementById('author').value);
-        formData.append('category', document.getElementById('category').value);
+        formData.append('category_id', document.getElementById('category').value);
         formData.append('pages', document.getElementById('pages').value);
         
         // files[0] accede al binario crudo del archivo seleccionado en el input de tipo file

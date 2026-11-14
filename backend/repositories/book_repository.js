@@ -31,9 +31,9 @@
       */
      async create(bookData) 
      {
-         const { user_id, filename, title, author, category, pages, file_path } = bookData;
+         const { user_id, filename, title, author, category_id, pages, file_path } = bookData;
          const [rows] = await db.execute('CALL sp_create_book(?, ?, ?, ?, ?, ?, ?)',
-             [user_id, filename, title, author, category, pages, file_path]);
+             [user_id, filename, title, author, category_id, pages, file_path]);
              
          // Los Stored Procedures de inserción fueron diseñados para devolver LAST_INSERT_ID()
          return rows[0][0].insertId;
@@ -76,9 +76,9 @@
 
      async update(id, userId, bookData) 
     {
-    const { title, author, category, pages } = bookData;
+    const { title, author, category_id, pages } = bookData;
     const [rows] = await db.execute('CALL sp_update_book_metadata(?, ?, ?, ?, ?, ?)',
-        [id, userId, title, author, category, pages]);
+        [id, userId, title, author, category_id, pages]);
 
     // El primer resultset contiene el SELECT final del SP: 1 fila si hubo coincidencia, 0 si no.
     return rows[0][0];

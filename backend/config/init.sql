@@ -66,6 +66,17 @@ CREATE TABLE users_roles (
 );
 
 /*
+ * @brief 5.1 Tabla de Categorías (Normalización - Requerimiento C)
+ * @details Las categorías pasan a ser una entidad propia: se definen una sola vez
+ * y los libros las referencian por id.
+ * @note Se crea ANTES que 'books' porque books.category_id es una FK hacia esta tabla.
+ */
+CREATE TABLE categories (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(50) NOT NULL UNIQUE
+);
+
+/*
  * @brief 6. Tabla de Libros/Documentos (Relación 1:N con Usuarios)
  */
 CREATE TABLE books (
@@ -74,11 +85,12 @@ CREATE TABLE books (
     filename VARCHAR(255) NOT NULL,
     title VARCHAR(100) NOT NULL,
     author VARCHAR(100) NOT NULL,
-    category VARCHAR(50),
+    category_id INT NOT NULL,
     pages INT DEFAULT 0,
     file_path VARCHAR(255) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE RESTRICT
 );
 /*
  * @brief 6.1 Tabla de Auditoría (Accounting / Trazabilidad forense)
@@ -104,6 +116,14 @@ CREATE TABLE audit_logs (
 
 -- 7. Inserción de Roles Maestros
 INSERT INTO roles (name) VALUES ('admin'), ('client');
+
+/* @brief 7.1 Datos semilla de categorías (Requerimiento C). Ids fijos para que sean predecibles en los tests. */
+INSERT INTO categories (id, name) VALUES
+    (1, 'Novela'),
+    (2, 'Ciencia Ficción'),
+    (3, 'Técnico / Académico'),
+    (4, 'Historia'),
+    (5, 'Poesía');
 
 /*
  * @brief 8. Datos Semilla (Seed Data) para desarrollo
@@ -203,20 +223,32 @@ CREATE PROCEDURE sp_create_book(
     IN p_filename VARCHAR(255),
     IN p_title VARCHAR(100),
     IN p_author VARCHAR(100),
-    IN p_category VARCHAR(50),
+    IN p_category_id INT,
     IN p_pages INT,
     IN p_file_path VARCHAR(255)
 )
 BEGIN
-    INSERT INTO books (user_id, filename, title, author, category, pages, file_path)
-    VALUES (p_user_id, p_filename, p_title, p_author, p_category, p_pages, p_file_path);
+    INSERT INTO books (user_id, filename, title, author, category_id, pages, file_path)
+    VALUES (p_user_id, p_filename, p_title, p_author, p_category_id, p_pages, p_file_path);
     SELECT LAST_INSERT_ID() as insertId;
 END //
 
 -- Listar libros asociados a un usuario específico
 CREATE PROCEDURE sp_find_books_by_user(IN p_user_id INT)
 BEGIN
-    SELECT * FROM books WHERE user_id = p_user_id;
+    SELECT b.*, c.name AS category
+    FROM books b
+    JOIN categories c ON b.category_id = c.id
+    WHERE b.user_id = p_user_id;
+END //
+
+/*
+ * @brief Listar todas las categorías disponibles (Requerimiento C).
+ * @note Sin parámetros: es un catálogo global. Ordenado por nombre para que el <select> sea predecible.
+ */
+CREATE PROCEDURE sp_get_all_categories()
+BEGIN
+    SELECT id, name FROM categories ORDER BY name ASC;
 END //
 
 /*
@@ -242,18 +274,21 @@ CREATE PROCEDURE sp_update_book_metadata(
        IN p_user_id INT,
        IN p_title VARCHAR(100),
        IN p_author VARCHAR(100),
-       IN p_category VARCHAR(50),
+       IN p_category_id INT
        IN p_pages INT
    )
    BEGIN
        UPDATE books
        SET title = p_title,
            author = p_author,
-           category = p_category,
+           category_id = p_category_id,
            pages = p_pages
        WHERE id = p_id AND user_id = p_user_id;
 
-       SELECT * FROM books WHERE id = p_id AND user_id = p_user_id;
+       SELECT b.*, c.name AS category
+       FROM books b
+       JOIN categories c ON b.category_id = c.id
+       WHERE b.id = p_id AND b.user_id = p_user_id;
    END //
    
 -- --- PROCEDIMIENTOS PARA AUDIT_LOGS ---
