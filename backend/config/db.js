@@ -3,6 +3,11 @@
  * @brief ConfiguraciÃ³n y exportaciÃ³n del Pool de conexiones a MySQL.
  * @project Bibliotech
  * @author TecnologÃ­as InformÃ¡ticas B - Facultad de IngenierÃ­a - UNMdP
+/**
+ * @file db.js
+ * @brief Configuración y exportación del Pool de conexiones a MySQL.
+ * @project Bibliotech
+ * @author Tecnologías Informáticas B - Facultad de Ingeniería - UNMdP
  * @license http://www.gnu.org/licenses/gpl.txt GNU GPL 3.0
  * @date Octubre 2026
  */
@@ -14,13 +19,13 @@
  const mysql = require('mysql2');
 
  /**
-  * @brief CreaciÃ³n del Pool de Conexiones.
-  * @details A diferencia de `mysql.createConnection()` que abre y cierra una Ãºnica conexiÃ³n TCP
-  * (lo cual genera un alto costo de rendimiento por el Handshake de red), un `Pool` mantiene
-  * mÃºltiples conexiones abiertas en memoria listas para ser reutilizadas por peticiones concurrentes.
-  *
-  * @note Seguridad: Nunca se deben exponer credenciales en texto plano en el cÃ³digo fuente.
-  * Siempre se inyectan en tiempo de ejecuciÃ³n mediante variables de entorno (process.env).
+  * @brief Creación del Pool de Conexiones.
+  * @details A diferencia de `mysql.createConnection()` que abre y cierra una única conexión TCP 
+  * (lo cual genera un alto costo de rendimiento por el Handshake de red), un `Pool` mantiene 
+  * múltiples conexiones abiertas en memoria listas para ser reutilizadas por peticiones concurrentes.
+  * 
+  * @note Seguridad: Nunca se deben exponer credenciales en texto plano en el código fuente. 
+  * Siempre se inyectan en tiempo de ejecución mediante variables de entorno (process.env).
   */
  const pool = mysql.createPool({
      host: process.env.DB_HOST,

@@ -3,6 +3,11 @@
  * @brief ConfiguraciÃ³n del middleware de carga de archivos (Multipart/form-data).
  * @project Bibliotech
  * @author TecnologÃ­as InformÃ¡ticas B - Facultad de IngenierÃ­a - UNMdP
+/**
+ * @file multer_config.js
+ * @brief Configuración del middleware de carga de archivos (Multipart/form-data).
+ * @project Bibliotech
+ * @author Tecnologías Informáticas B - Facultad de Ingeniería - UNMdP
  * @license http://www.gnu.org/licenses/gpl.txt GNU GPL 3.0
  * @date Octubre 2026
  */
