@@ -1,6 +1,6 @@
 /**
  * @file books_front_controller.js
- * @brief Controlador frontend para gestionar la carga, listado y lectura de documentos.
+ * @brief Controlador frontend para gestionar la carga, listado, lectura y actualización de documentos.
  * @project Bibliotech
  * @author Tecnologías Informáticas B - Facultad de Ingeniería - UNMdP
  * @license http://www.gnu.org/licenses/gpl.txt GNU GPL 3.0
@@ -68,6 +68,19 @@
          tdReading.appendChild(linkDownload);
  
          const tdActions = document.createElement('td');
+
+         // Botón de Editar Metadatos
+         const btnEdit = document.createElement('button');
+         btnEdit.className = 'w3-button w3-blue w3-tiny w3-round w3-margin-right';
+         btnEdit.textContent = 'Editar';
+         btnEdit.addEventListener('click', () => 
+         {
+             showEditMetadataModal(b, async (bookId, updatedData, modalElement) => {
+                 await updateBookMetadata(bookId, updatedData, modalElement);
+             });
+         });
+         tdActions.appendChild(btnEdit);
+
          const btnDelete = document.createElement('button');
          btnDelete.className = 'w3-button w3-red w3-tiny w3-round';
          btnDelete.textContent = 'Borrar';
@@ -98,6 +111,21 @@
      catch (error) 
      {
          showModal('Error', error.message);
+     }
+ }
+
+ async function updateBookMetadata(id, updatedData, modalElement) 
+ {
+     try 
+     {
+         await apiService.request(`/books/${id}`, 'PUT', updatedData);
+         modalElement.style.display = 'none';
+         showModal('Actualizado', 'Los metadatos del documento han sido modificados correctamente.');
+         loadBooks();
+     } 
+     catch (error) 
+     {
+         showModal('Error al actualizar', error.message);
      }
  }
  

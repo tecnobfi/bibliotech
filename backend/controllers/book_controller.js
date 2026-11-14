@@ -7,6 +7,7 @@
  * @date Octubre 2026
  */
 
+
 const fileHelper = require('../utils/file_helper/file_helper');
 const bookRepository = require('../repositories/book_repository');
 const auditRepository = require('../repositories/audit_repository');
@@ -20,9 +21,9 @@ class BookController
 {
     /**
      * @brief Sube un libro PDF y guarda sus metadatos en la base de datos.
-     * @param {Object} req Petición HTTP Multipart.
-     * @param {Object} res Respuesta HTTP.
-     * @param {Function} next Función para delegar errores al Global Error Handler.
+     * @param {Object} req - Petición HTTP Multipart.
+     * @param {Object} res - Respuesta HTTP.
+     * @param {Function} next - Función para delegar errores al Global Error Handler.
      */
     async uploadBook(req, res, next) 
     {
@@ -60,9 +61,9 @@ class BookController
 
     /**
      * @brief Lista todos los libros pertenecientes al usuario autenticado.
-     * @param {Object} req Petición HTTP.
-     * @param {Object} res Respuesta HTTP.
-     * @param {Function} next Función para delegar errores.
+     * @param {Object} req - Petición HTTP.
+     * @param {Object} res - Respuesta HTTP.
+     * @param {Function} next - Función para delegar errores.
      */
     async getMyBooks(req, res, next)
     {
@@ -80,9 +81,9 @@ class BookController
     /**
      * @brief Elimina un documento específico validando previamente la propiedad del mismo
      * y registra el evento en el log de auditoría del sistema.
-     * @param {Object} req Petición HTTP.
-     * @param {Object} res Respuesta HTTP.
-     * @param {Function} next Función para delegar errores.
+     * @param {Object} req - Petición HTTP.
+     * @param {Object} res - Respuesta HTTP.
+     * @param {Function} next - Función para delegar errores.
      */
     async deleteBook(req, res, next) 
     {
@@ -122,6 +123,30 @@ class BookController
             next(error);
         }
     }
+
+    /**
+     * @brief Actualiza los metadatos de un libro específico.
+     * @param {Object} req - Petición HTTP.
+     * @param {Object} res - Respuesta HTTP.
+     * @param {Function} next - Función para delegar errores.
+     */
+    async updateBookMetadata(req, res, next) {
+        try {
+            const bookId = req.params.id;
+            const userId = req.userId;
+            const { title, author, pages, category } = req.body;
+
+            await bookRepository.updateMetadata(bookId, userId, { title, author, pages, category });
+
+            return res.status(200).json({
+                success: true,
+                message: 'Metadatos del libro actualizados correctamente.'
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
 }
 
 module.exports = new BookController();
+
