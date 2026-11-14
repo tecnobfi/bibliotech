@@ -26,5 +26,8 @@
     "CT_AUTH_LOGIN_SUCCESS": "Login successful.",
     "CT_BOOK_UPLOAD_SUCCESS": "PDF document successfully uploaded to the library.",
     "CT_BOOK_NOT_FOUND": "The document does not exist or you do not have permission to delete it.",
-    "CT_BOOK_DELETED_SUCCESS": "Record deleted and physical file successfully removed."
+    "CT_BOOK_DELETED_SUCCESS": "Record deleted and physical file successfully removed.",
+    "CT_BOOK_ID_INVALID": "El identificador del documento no es válido.",
+    "CT_BOOK_UPDATE_NOT_FOUND": "El documento no existe o no tienes permisos para modificarlo.",
+    "CT_BOOK_UPDATED_SUCCESS": "Metadatos del documento actualizados con éxito."
 }

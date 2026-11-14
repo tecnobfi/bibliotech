@@ -9,6 +9,7 @@
 
  const fileHelper = require('../utils/file_helper/file_helper');
  const bookRepository = require('../repositories/book_repository');
+ const auditRepository = require('../repositories/audit_repository'); // Capa de auditoría (Accounting)
  const i18n = require('../utils/i18n/i18n'); // Inyección del gestor de idiomas
  
  /**
@@ -104,6 +105,20 @@
              // Eliminar archivo físico en disco de forma síncrona
              fileHelper.deleteFile(book.file_path); 
              
+             /**
+              * @brief Registro de auditoría asincrónico (Acción: DELETE_BOOK).
+              * @details Se ejecuta DESPUÉS de que la eliminación fue exitosa: auditamos
+              * hechos consumados, no intentos fallidos. Con 'await' el Event Loop queda
+              * libre mientras MySQL responde. Si el log falla, el error se delega a
+              * next(error) en vez de ocultarse.
+              */
+             await auditRepository.create({
+                 user_id: userId,
+                 action: auditRepository.ACTIONS.DELETE_BOOK,
+                 target: `book:${id} (${book.title})`,
+                 ip_address: req.ip
+             });
+             
              const message = i18n.getMessage('CT_BOOK_DELETED_SUCCESS');
              res.json({ message });
          }
@@ -112,6 +127,37 @@
              next(error);
          }
      }
+
+     async updateBook(req, res, next) 
+    {
+        try 
+        {
+            const { id } = req.params;
+            const userId = req.userId;
+            const { title, author, category, pages } = req.body;
+
+            const updatedBook = await bookRepository.update(id, userId, {
+                title: String(title).trim(),
+                author: String(author).trim(),
+                category: String(category).trim(),
+                pages: parseInt(pages)
+            });
+
+        // Sin fila devuelta: el libro no existe o pertenece a otro usuario (se responde igual para no revelar cuál de los dos casos es)
+        if (!updatedBook) 
+        {
+            const message = i18n.getMessage('CT_BOOK_UPDATE_NOT_FOUND');
+            return res.status(404).json({ message });
+        }
+
+        const message = i18n.getMessage('CT_BOOK_UPDATED_SUCCESS');
+        res.json({ message, book: updatedBook });
+    }
+    catch (error)
+    {
+        next(error);
+    }
+    }
  }
  
  module.exports = new BookController();

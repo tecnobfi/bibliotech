@@ -9,6 +9,7 @@
 
  const userRepository = require('../repositories/user_repository');
  const bookRepository = require('../repositories/book_repository');
+ const auditRepository = require('../repositories/audit_repository'); // Capa de auditoría (Accounting)
  const fileHelper = require('../utils/file_helper/file_helper');
  const i18n = require('../utils/i18n/i18n'); // Inyección del gestor de idiomas
  
@@ -72,7 +73,20 @@
  
              // Limpieza física: Eliminar almacenamiento en disco
              userBooks.forEach(book => {fileHelper.deleteFile(book.file_path);});
- 
+             
+             /**
+              * @brief Registro de auditoría asincrónico (Acción: DELETE_USER).
+              * @details El actor es el ADMINISTRADOR que ejecutó la baja y el target es la
+              * cuenta eliminada. Se registra tras confirmar que el usuario existía
+              * (después del chequeo 404) para no auditar operaciones que no ocurrieron.
+              */
+             await auditRepository.create({
+                 user_id: adminId,
+                 action: auditRepository.ACTIONS.DELETE_USER,
+                 target: `user:${targetUserId}`,
+                 ip_address: req.ip
+             });
+             
              // Reemplazo dinámico (%s) para mostrar la cantidad de archivos borrados
              const message = i18n.getMessage('CT_ADMIN_USER_DELETED').replace('%s', userBooks.length);
              res.json({ message });

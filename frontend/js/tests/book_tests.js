@@ -51,7 +51,7 @@
      const formData = new FormData();
      formData.append('title', 'Don Quijote de la Mancha');
      formData.append('author', 'Miguel de Cervantes');
-     formData.append('category', 'Novela');
+     formData.append('category_id', '1'); // id 1 = 'Novela' (seed)
      formData.append('pages', '862');
  
      /**

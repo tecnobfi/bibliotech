@@ -66,6 +66,17 @@ CREATE TABLE users_roles (
 );
 
 /*
+ * @brief 5.1 Tabla de Categorías (Normalización - Requerimiento C)
+ * @details Las categorías pasan a ser una entidad propia: se definen una sola vez
+ * y los libros las referencian por id.
+ * @note Se crea ANTES que 'books' porque books.category_id es una FK hacia esta tabla.
+ */
+CREATE TABLE categories (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(50) NOT NULL UNIQUE
+);
+
+/*
  * @brief 6. Tabla de Libros/Documentos (Relación 1:N con Usuarios)
  */
 CREATE TABLE books (
@@ -74,15 +85,45 @@ CREATE TABLE books (
     filename VARCHAR(255) NOT NULL,
     title VARCHAR(100) NOT NULL,
     author VARCHAR(100) NOT NULL,
-    category VARCHAR(50),
+    category_id INT NOT NULL,
     pages INT DEFAULT 0,
     file_path VARCHAR(255) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE RESTRICT
+);
+/*
+ * @brief 6.1 Tabla de Auditoría (Accounting / Trazabilidad forense)
+ * @details Registra QUIÉN hizo QUÉ, sobre QUÉ recurso y CUÁNDO. A diferencia de un
+ * console.log, estos registros persisten en disco y se pueden consultar con SQL.
+ * @note Decisión de diseño: user_id NO tiene FOREIGN KEY hacia users. Con ON DELETE
+ * CASCADE, al borrar un usuario se borrarían también sus registros de auditoría
+ * (justo la evidencia que queremos conservar). Un log debe ser de solo-agregado.
+ * @note ip_address es VARCHAR(45) para alojar una IPv6 textual y es opcional (NULL).
+ */
+ 
+CREATE TABLE audit_logs (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NULL,
+    action VARCHAR(50) NOT NULL,
+    target VARCHAR(255) NOT NULL,
+    ip_address VARCHAR(45) NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_audit_logs_user_id (user_id),
+    INDEX idx_audit_logs_action (action),
+    INDEX idx_audit_logs_created_at (created_at)
 );
 
 -- 7. Inserción de Roles Maestros
 INSERT INTO roles (name) VALUES ('admin'), ('client');
+
+/* @brief 7.1 Datos semilla de categorías (Requerimiento C). Ids fijos para que sean predecibles en los tests. */
+INSERT INTO categories (id, name) VALUES
+    (1, 'Novela'),
+    (2, 'Ciencia Ficción'),
+    (3, 'Técnico / Académico'),
+    (4, 'Historia'),
+    (5, 'Poesía');
 
 /*
  * @brief 8. Datos Semilla (Seed Data) para desarrollo
@@ -158,10 +199,18 @@ BEGIN
     JOIN roles r ON ur.role_id = r.id;
 END //
 
--- Borrar usuario por ID
+/*
+ * @brief Borrar usuario por ID.
+ * @return affectedRows Cantidad de filas borradas (0 si el id no existía).
+ * @note Se devuelve ROW_COUNT() para que el Repositorio distinga "borré uno" de
+ * "no existía". Sin esto el controlador nunca detectaba el 404 y la auditoría
+ * habría registrado eliminaciones que en realidad no ocurrieron.
+ */
+
 CREATE PROCEDURE sp_delete_user(IN p_id INT)
 BEGIN
     DELETE FROM users WHERE id = p_id;
+    SELECT ROW_COUNT() AS affectedRows;
 END //
 
 -- --- PROCEDIMIENTOS PARA BOOKS ---
@@ -174,20 +223,32 @@ CREATE PROCEDURE sp_create_book(
     IN p_filename VARCHAR(255),
     IN p_title VARCHAR(100),
     IN p_author VARCHAR(100),
-    IN p_category VARCHAR(50),
+    IN p_category_id INT,
     IN p_pages INT,
     IN p_file_path VARCHAR(255)
 )
 BEGIN
-    INSERT INTO books (user_id, filename, title, author, category, pages, file_path)
-    VALUES (p_user_id, p_filename, p_title, p_author, p_category, p_pages, p_file_path);
+    INSERT INTO books (user_id, filename, title, author, category_id, pages, file_path)
+    VALUES (p_user_id, p_filename, p_title, p_author, p_category_id, p_pages, p_file_path);
     SELECT LAST_INSERT_ID() as insertId;
 END //
 
 -- Listar libros asociados a un usuario específico
 CREATE PROCEDURE sp_find_books_by_user(IN p_user_id INT)
 BEGIN
-    SELECT * FROM books WHERE user_id = p_user_id;
+    SELECT b.*, c.name AS category
+    FROM books b
+    JOIN categories c ON b.category_id = c.id
+    WHERE b.user_id = p_user_id;
+END //
+
+/*
+ * @brief Listar todas las categorías disponibles (Requerimiento C).
+ * @note Sin parámetros: es un catálogo global. Ordenado por nombre para que el <select> sea predecible.
+ */
+CREATE PROCEDURE sp_get_all_categories()
+BEGIN
+    SELECT id, name FROM categories ORDER BY name ASC;
 END //
 
 /*
@@ -206,6 +267,55 @@ END //
 CREATE PROCEDURE sp_delete_book(IN p_id INT, IN p_user_id INT)
 BEGIN
     DELETE FROM books WHERE id = p_id AND user_id = p_user_id;
+END //
+
+CREATE PROCEDURE sp_update_book_metadata(
+       IN p_id INT,
+       IN p_user_id INT,
+       IN p_title VARCHAR(100),
+       IN p_author VARCHAR(100),
+       IN p_category_id INT
+       IN p_pages INT
+   )
+   BEGIN
+       UPDATE books
+       SET title = p_title,
+           author = p_author,
+           category_id = p_category_id,
+           pages = p_pages
+       WHERE id = p_id AND user_id = p_user_id;
+
+       SELECT b.*, c.name AS category
+       FROM books b
+       JOIN categories c ON b.category_id = c.id
+       WHERE b.id = p_id AND b.user_id = p_user_id;
+   END //
+   
+-- --- PROCEDIMIENTOS PARA AUDIT_LOGS ---
+
+/*
+ * @brief Inserta un nuevo registro de auditoría (Accounting).
+ * @param p_user_id Id del usuario que ejecutó la acción (el actor, no la víctima).
+ * @param p_action Código de la acción (ej: 'DELETE_BOOK', 'DELETE_USER').
+ * @param p_target Recurso afectado (ej: 'book:12', 'user:5').
+ * @param p_ip_address IP de origen (opcional, puede ser NULL).
+ * @return insertId Id del registro creado.
+ * @note Seguridad: el usuario 'bibliotech' solo tiene SELECT y EXECUTE, o sea NO
+ * puede hacer INSERT directo. Este SP funciona porque corre con los privilegios de
+ * su DEFINER (SQL SECURITY DEFINER es el valor por defecto). Así la app solo puede
+ * AGREGAR logs, nunca modificarlos ni borrarlos.
+ */  
+
+CREATE PROCEDURE sp_create_audit_log(
+    IN p_user_id INT,
+    IN p_action VARCHAR(50),
+    IN p_target VARCHAR(255),
+    IN p_ip_address VARCHAR(45)
+)
+BEGIN
+    INSERT INTO audit_logs (user_id, action, target, ip_address)
+    VALUES (p_user_id, p_action, p_target, p_ip_address);
+    SELECT LAST_INSERT_ID() as insertId;
 END //
 
 DELIMITER ;
