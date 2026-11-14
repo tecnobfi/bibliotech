@@ -1,0 +1,45 @@
+<!--
+ * @file register.html
+ * @brief Pantalla pública de creación de cuenta de cliente.
+ * @project Bibliotech
+ * @author Tecnologías Informáticas B - Facultad de Ingeniería - UNMdP
+-->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Bibliotech - Registro</title>
+    <link rel="stylesheet" href="../css/w3.css">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="icon" type="image/png" href="../img/favicon.png">
+</head>
+<body class="w3-display-container" style="height:100vh;">
+
+    <div class="w3-display-middle w3-mobile" style="width:400px;">
+        <div class="w3-card-4 vault-card w3-padding-large w3-round-large">
+            <h2 class="w3-center w3-text-teal"><b>BIBLIOTECH</b></h2>
+            <p class="w3-center">Crea tu cuenta de Cliente</p>
+            
+            <form id="registerForm">
+                <label>Nombre de Usuario</label>
+                <input class="w3-input w3-border w3-round w3-transparent w3-text-white" type="text" id="username" required>
+                
+                <br>
+                <label>Contraseña (mínimo 6 caracteres)</label>
+                <!-- Se confía en validation_middleware del backend para evaluar los 6 caracteres mínimos -->
+                <input class="w3-input w3-border w3-round w3-transparent w3-text-white" type="password" id="password" required>
+                
+                <br>
+                <button type="submit" class="w3-button w3-teal w3-block w3-round-large"><b>REGISTRARSE</b></button>
+            </form>
+            
+            <p class="w3-small w3-center">¿Ya tienes cuenta? <a href="/login" class="w3-text-teal">Inicia Sesión</a></p>
+        </div>
+    </div>
+
+    <script src="../js/services/api_service.js"></script>
+    <script src="../js/components/ui_handlers.js"></script>
+    <script src="../js/utils/auth_helper.js"></script>
+    <script src="../js/front_controllers/auth_front_controller.js"></script>
+</body>
+</html>

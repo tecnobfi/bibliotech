@@ -1,0 +1,45 @@
+<!--
+ * @file tests.html
+ * @brief Laboratorio de Pruebas API (Suite Unit Testing simulada en DOM).
+ * @project Bibliotech
+ * @author Tecnologías Informáticas B - Facultad de Ingeniería - UNMdP
+-->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Bibliotech - Laboratorio de Pruebas API</title>
+    <link rel="stylesheet" href="../css/w3.css">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="icon" type="image/png" href="../img/favicon.png">
+</head>
+<body class="w3-dark-grey">
+
+    <div class="w3-container w3-padding-32">
+        <h1 class="w3-text-teal"><b>Laboratorio de Pruebas API - Bibliotech</b></h1>
+        <p>Consola interactiva de ejecución de pruebas unitarias sobre endpoints.</p>
+
+        <div class="w3-row-padding">
+            <!-- Columna Interactiva: Contenedor para botones de test -->
+            <div id="test-container" class="w3-col l6 m12 s12">
+                <h3 class="w3-text-white">Ejecutar Pruebas</h3>
+            </div>
+
+            <!-- Columna de Resultados: Consola virtual -->
+            <div class="w3-col l6 m12 s12">
+                <h3 class="w3-text-white">Resultado de la API</h3>
+                <!-- Uso de overflow-y para simular un comportamiento de terminal desplazable -->
+                <div id="api-console" class="w3-code w3-black w3-border-teal w3-border w3-padding" style="min-height: 400px; overflow-y: auto;">
+                    Esperando ejecución...
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Orden de carga: Primero la infraestructura (utils), luego los casos de prueba concretos -->
+    <script src="../js/tests/test_utils.js"></script>
+    <script src="../js/tests/auth_tests.js"></script>
+    <script src="../js/tests/book_tests.js"></script>
+    <script src="../js/tests/admin_tests.js"></script>
+</body>
+</html>

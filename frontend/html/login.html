@@ -1,0 +1,53 @@
+<!--
+ * @file login.html
+ * @brief Pantalla pública de inicio de sesión.
+ * @project Bibliotech
+ * @author Tecnologías Informáticas B - Facultad de Ingeniería - UNMdP
+-->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Bibliotech - Iniciar Sesión</title>
+    <!-- Importación de framework estructural (W3.CSS) seguido de hoja de estilos local -->
+    <link rel="stylesheet" href="../css/w3.css">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="icon" type="image/png" href="../img/favicon.png">
+</head>
+<body class="w3-display-container" style="height:100vh;">
+
+    <!-- Contenedor centrado dinámicamente en pantalla -->
+    <div class="w3-display-middle w3-mobile" style="width:400px;">
+        <div class="w3-card-4 vault-card w3-padding-large w3-round-large">
+            <h2 class="w3-center w3-text-teal"><b>BIBLIOTECH</b></h2>
+            <p class="w3-center">Ingresa a tu biblioteca digital</p>
+            
+            <!-- 
+                El formulario no utiliza action="" nativo. El evento "submit" 
+                es capturado y prevenido (e.preventDefault()) por auth_front_controller.js 
+                para evitar la recarga de la SPA (Single Page Application).
+            -->
+            <form id="loginForm">
+                <label>Usuario</label>
+                <!-- required: Validación nativa de HTML5 (Previene envío de campos vacíos) -->
+                <input class="w3-input w3-border w3-round w3-transparent w3-text-white" type="text" id="username" required>
+                
+                <br>
+                <label>Contraseña</label>
+                <input class="w3-input w3-border w3-round w3-transparent w3-text-white" type="password" id="password" required>
+                
+                <br>
+                <button type="submit" class="w3-button w3-teal w3-block w3-round-large"><b>ENTRAR</b></button>
+            </form>
+            
+            <p class="w3-small w3-center">¿No tienes cuenta? <a href="/register" class="w3-text-teal">Regístrate</a></p>
+        </div>
+    </div>
+
+    <!-- Orden estricto de carga de scripts: Utilidades > Servicios > Controladores -->
+    <script src="../js/services/api_service.js"></script>
+    <script src="../js/components/ui_handlers.js"></script>
+    <script src="../js/utils/auth_helper.js"></script>
+    <script src="../js/front_controllers/auth_front_controller.js"></script>
+</body>
+</html>

@@ -1,0 +1,50 @@
+/*
+ * @file style.css
+ * @brief Hoja de estilos personalizados (Overrides) para Bibliotech.
+ * @project Bibliotech
+ * @author Tecnologías Informáticas B - Facultad de Ingeniería - UNMdP
+ * @license http://www.gnu.org/licenses/gpl.txt GNU GPL 3.0
+ * @date Octubre 2026
+ * 
+ * @details Esta hoja de estilos complementa a w3.css. Utiliza variables CSS 
+ * (Custom Properties) en la pseudo-clase :root para mantener una paleta de 
+ * colores centralizada (Single Source of Truth).
+ */
+
+:root 
+{
+    --vault-blue: #009688;   /* Teal corporativo */
+    --vault-dark: #121212;   /* Fondo base modo oscuro */
+    --vault-grey: #242424;   /* Fondo de tarjetas elevadas */
+    --vault-accent: #80cbc4; /* Acentos brillantes */
+}
+
+body
+{
+    background-color: var(--vault-dark);
+    color: white;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+td
+{
+    background-color: #242424;
+}
+
+/*
+ * @note Uso de !important: Justificado únicamente cuando se necesita 
+ * sobrescribir forzosamente una regla de alta especificidad de un 
+ * framework externo (w3.css).
+ */
+.vault-card
+{
+    background-color: var(--vault-grey) !important;
+    border: 1px solid #333;
+}
+
+/* Estilo de contención para los visores de PDF integrados */
+iframe
+{
+    background-color: #fff;
+    border-radius: 4px;
+}
