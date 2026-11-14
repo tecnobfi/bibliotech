@@ -81,6 +81,52 @@ class BookController
         }
     }
 
+
+    /**
+     * @brief Actualiza los metadatos de un libro existente.
+     * @details Permite editar titulo, autor, categoria y paginas
+     * sin modificar el archivo PDF original.
+     * @param {Object} req - Peticion HTTP con ID y nuevos datos.
+     * @param {Object} res - Respuesta HTTP.
+     * @param {Function} next - Delegacion de errores.
+     */
+    async updateBook(req, res, next)
+    {
+        try
+        {
+            const { id } = req.params;
+            const userId = req.userId;
+            const { title, author, category_id, pages } = req.body;
+
+            // Verificar que el libro exista y pertenezca al usuario
+            const book = await bookRepository.findById(id, userId);
+
+            if (!book)
+            {
+                const message = i18n.getMessage('CT_BOOK_NOT_FOUND');
+                return res.status(404).json({ message });
+            }
+
+            // Actualizar exclusivamente los metadatos
+            const affectedRows = await bookRepository.update(id, userId, {
+                title,
+                author,
+                category_id: Number(category_id),
+                pages: Number(pages)
+            });
+
+       
+            res.json({
+                message: 'Metadatos actualizados correctamente.'
+            });
+        }
+        catch (error)
+        {
+            next(error);
+        }
+    }
+
+
     /**
      * @brief Elimina un documento específico validando previamente la propiedad del mismo.
      * @param {Object} req - Petición HTTP.

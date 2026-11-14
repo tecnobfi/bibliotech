@@ -345,3 +345,145 @@ function showDeleteCategoryModal(categories, onSubmit)
     modal.style.display = 'block';
     setTimeout(() => selectElem.focus(), 50);
 }
+
+/**
+ * @brief Muestra un formulario modal para editar los metadatos de un libro.
+ * @param {Object} book - Libro que se desea editar.
+ * @param {Array<Object>} categories - Categorias disponibles.
+ * @param {Function} onSubmit - Funcion que guarda los cambios.
+ */
+
+
+function showEditBookModal(book, categories, onSubmit)
+{
+    const modal = document.createElement('div');
+    modal.className = 'w3-modal';
+    modal.style.zIndex = '9999';
+
+    const content = document.createElement('div');
+    content.className = 'w3-modal-content w3-card-4 w3-animate-zoom vault-card';
+    content.style.maxWidth = '450px';
+
+    const header = document.createElement('header');
+    header.className = 'w3-container w3-border-bottom';
+
+    const heading = document.createElement('h3');
+    heading.textContent = 'Editar libro';
+    heading.className = 'w3-text-teal';
+    header.appendChild(heading);
+
+    const form = document.createElement('form');
+    form.className = 'w3-container w3-padding-16';
+
+    function addField(labelText, value, type)
+    {
+        const label = document.createElement('label');
+        label.textContent = labelText;
+
+        const input = document.createElement('input');
+        input.type = type;
+        input.value = value;
+        input.required = true;
+        input.className = 'w3-input w3-border w3-round w3-margin-bottom';
+
+        if (type === 'number')
+        {
+            input.min = '1';
+            input.step = '1';
+        }
+
+        form.appendChild(label);
+        form.appendChild(input);
+
+        return input;
+    }
+
+    const titleInput = addField('Título', book.title, 'text');
+    const authorInput = addField('Autor', book.author, 'text');
+    const pagesInput = addField('Páginas', book.pages, 'number');
+
+    const categoryLabel = document.createElement('label');
+    categoryLabel.textContent = 'Categoría';
+
+    const categorySelect = document.createElement('select');
+    categorySelect.className = 'w3-select w3-border w3-round w3-margin-bottom';
+    categorySelect.required = true;
+
+    categories.forEach(category =>
+    {
+        const option = document.createElement('option');
+        option.value = category.id;
+        option.textContent = category.name;
+        categorySelect.appendChild(option);
+    });
+
+    categorySelect.value = String(book.category_id);
+
+    form.appendChild(categoryLabel);
+    form.appendChild(categorySelect);
+
+    const actions = document.createElement('div');
+    actions.className = 'w3-margin-top w3-right-align';
+
+    const cancelButton = document.createElement('button');
+    cancelButton.type = 'button';
+    cancelButton.textContent = 'Cancelar';
+    cancelButton.className = 'w3-button w3-dark-grey w3-round w3-margin-right';
+
+    const saveButton = document.createElement('button');
+    saveButton.type = 'submit';
+    saveButton.textContent = 'Guardar cambios';
+    saveButton.className = 'w3-button w3-teal w3-round';
+
+    function closeModal()
+    {
+        modal.remove();
+    }
+
+    cancelButton.addEventListener('click', closeModal);
+
+    actions.appendChild(cancelButton);
+    actions.appendChild(saveButton);
+    form.appendChild(actions);
+
+    form.addEventListener('submit', async (event) =>
+    {
+        event.preventDefault();
+
+        const updatedData = {
+            title: titleInput.value.trim(),
+            author: authorInput.value.trim(),
+            category_id: Number(categorySelect.value),
+            pages: Number(pagesInput.value)
+        };
+
+        if (!updatedData.title || !updatedData.author)
+        {
+            return;
+        }
+
+        saveButton.disabled = true;
+
+        try
+        {
+            await onSubmit(updatedData);
+            closeModal();
+        }
+        catch (error)
+        {
+            console.error('Error al actualizar el libro:', error);
+        }
+        finally
+        {
+            saveButton.disabled = false;
+        }
+    });
+
+    content.appendChild(header);
+    content.appendChild(form);
+    modal.appendChild(content);
+    document.body.appendChild(modal);
+
+    modal.style.display = 'block';
+    titleInput.focus();
+}

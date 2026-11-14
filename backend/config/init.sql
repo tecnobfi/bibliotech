@@ -215,6 +215,38 @@ BEGIN
 END //
 
 /*
+ * @brief Actualiza los metadatos de un libro existente.
+ * @details Permite modificar titulo, autor, categoria y paginas
+ * sin alterar el archivo PDF almacenado.
+ * @note Seguridad: Solo actualiza libros pertenecientes al usuario.
+ * @param p_id Identificador del libro.
+ * @param p_user_id Identificador del usuario autenticado.
+ * @param p_title Nuevo titulo.
+ * @param p_author Nuevo autor.
+ * @param p_category_id Nueva categoria.
+ * @param p_pages Nueva cantidad de paginas.
+ */
+CREATE PROCEDURE sp_update_book_metadata(
+    IN p_id INT,
+    IN p_user_id INT,
+    IN p_title VARCHAR(100),
+    IN p_author VARCHAR(100),
+    IN p_category_id INT,
+    IN p_pages INT
+)
+BEGIN
+    UPDATE books
+    SET
+        title = p_title,
+        author = p_author,
+        category_id = p_category_id,
+        pages = p_pages
+    WHERE id = p_id AND user_id = p_user_id;
+
+    SELECT ROW_COUNT() AS affectedRows;
+END //
+
+/*
  * @brief Borrar libro (Validando autoría)
  */
 CREATE PROCEDURE sp_delete_book(IN p_id INT, IN p_user_id INT)

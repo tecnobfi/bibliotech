@@ -213,6 +213,22 @@ function renderBooksTable(books)
         tdReading.appendChild(linkDownload);
 
         const tdActions = document.createElement('td');
+
+        const btnEdit = document.createElement('button');
+        btnEdit.className = 'w3-button w3-blue w3-tiny w3-round w3-margin-right';
+        btnEdit.textContent = 'Editar';
+
+        btnEdit.addEventListener('click', () =>
+        {
+            showEditBookModal(b, cachedCategories, async (updatedData) =>
+            {
+                await apiService.request(`/books/${b.id}`, 'PUT', updatedData);
+                await loadBooks();
+            });
+        });
+
+        tdActions.appendChild(btnEdit);
+
         const btnDelete = document.createElement('button');
         btnDelete.className = 'w3-button w3-red w3-tiny w3-round';
         btnDelete.textContent = 'Borrar';

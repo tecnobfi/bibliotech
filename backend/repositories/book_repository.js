@@ -62,6 +62,29 @@ class BookRepository
         return rows[0][0]; 
     }
 
+
+    /**
+     * @brief Actualiza los metadatos de un libro existente.
+     * @details Ejecuta un Stored Procedure que verifica la propiedad
+     * del documento antes de modificar sus datos.
+     * @param {number} id - Identificador del libro.
+     * @param {number} userId - Identificador del usuario autenticado.
+     * @param {Object} bookData - Nuevos metadatos del libro.
+     * @returns {Promise<number>} Cantidad de filas actualizadas.
+     */
+    async update(id, userId, bookData)
+    {
+        const { title, author, category_id, pages } = bookData;
+
+        const [rows] = await db.execute(
+            'CALL sp_update_book_metadata(?, ?, ?, ?, ?, ?)',
+            [id, userId, title, author, category_id, pages]
+        );
+
+        return rows[0][0].affectedRows;
+    }
+
+
     /**
      * @brief Elimina un documento de la base de datos.
      * @param {number} id - ID del libro.

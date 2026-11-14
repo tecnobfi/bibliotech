@@ -120,6 +120,71 @@ const validationMiddleware = {
         }
     },
 
+
+    /**
+     * @brief Valida los metadatos enviados para editar un libro.
+     * @details Reutiliza las reglas del sistema y rechaza
+     * identificadores invalidos y campos vacios.
+     * @param {Object} req - Peticion HTTP con ID y metadatos.
+     * @param {Object} res - Respuesta HTTP.
+     * @param {Function} next - Continua si los datos son validos.
+     */
+    validateBookUpdate: (req, res, next) =>
+    {
+        const { id } = req.params;
+        const { title, author, category_id, pages } = req.body;
+        const validator = new Validator();
+
+        try
+        {
+            validator.validateThis(title)
+                     .with(new Required("CT_REQ_TITLE"));
+
+            validator.validateThis(author)
+                     .with(new Required("CT_REQ_AUTHOR"));
+
+            validator.validateThis(category_id)
+                     .with(new Required("CT_REQ_CATEGORY"));
+
+            // Evitar valores que sean solo espacios.
+            if (typeof title !== 'string' || !title.trim() ||
+                typeof author !== 'string' || !author.trim())
+            {
+                return res.status(400).json({
+                    message: 'El titulo y el autor no pueden estar vacios.'
+                });
+            }
+
+            // Los identificadores deben ser enteros positivos.
+            if (!Number.isSafeInteger(Number(id)) || Number(id) <= 0 ||
+                !Number.isSafeInteger(Number(category_id)) ||
+                Number(category_id) <= 0)
+            {
+                return res.status(400).json({
+                    message: 'Identificador de libro o categoria invalido.'
+                });
+            }
+
+            validator.validateThis(pages)
+                     .with(new Required("CT_PAGES_POSITIVE"));
+
+            if (!Number.isSafeInteger(Number(pages)) || Number(pages) <= 0)
+            {
+                return res.status(400).json({
+                    message: 'La cantidad de paginas debe ser un entero positivo.'
+                });
+            }
+
+            next();
+        }
+        catch (error)
+        {
+            return res.status(400).json({ message: error.message });
+        }
+    },
+
+
+
     /**
      * @brief Valida el cuerpo de la petición al crear una nueva categoría.
      * @param {Object} req - Petición HTTP conteniendo req.body.name.
