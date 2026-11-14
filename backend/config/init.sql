@@ -210,3 +210,48 @@ END //
 
 DELIMITER ;
 SET foreign_key_checks = 1;
+
+
+-- MÓDULO DE TRAZABILIDAD Y AUDITORÍA (ACCOUNTING) 
+
+/**
+ * @brief Tabla de registros de auditoría para análisis forense del sistema.
+ * @details Persiste las acciones críticas ejecutadas por clientes y administradores
+ *          evitando depender únicamente de trazas volátiles en consola.
+ */
+CREATE TABLE IF NOT EXISTS audit_logs
+(
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NULL,
+    action VARCHAR(100) NOT NULL,
+    target VARCHAR(255) NOT NULL,
+    ip_address VARCHAR(45) NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_audit_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+);
+
+DELIMITER //
+
+/**
+ * @brief Procedimiento almacenado para insertar un nuevo evento de auditoría.
+ * @details Encapsula la inserción bajo el Principio de Menor Privilegio (PoLP)
+ *          y previene inyecciones SQL mediante parámetros tipados.
+ * @param p_user_id Identificador del usuario que ejecuta la acción.
+ * @param p_action Código de la acción realizada (ej. 'DELETE_BOOK', 'DELETE_USER').
+ * @param p_target Identificador o descripción del recurso afectado.
+ * @param p_ip_address Dirección IP desde donde se originó la petición.
+ */
+DROP PROCEDURE IF EXISTS sp_create_audit_log //
+CREATE PROCEDURE sp_create_audit_log
+(
+    IN p_user_id INT,
+    IN p_action VARCHAR(100),
+    IN p_target VARCHAR(255),
+    IN p_ip_address VARCHAR(45)
+)
+BEGIN
+    INSERT INTO audit_logs (user_id, action, target, ip_address)
+    VALUES (p_user_id, p_action, p_target, p_ip_address);
+END //
+
+DELIMITER ;
