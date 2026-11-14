@@ -9,6 +9,7 @@
 
  const fileHelper = require('../utils/file_helper/file_helper');
  const bookRepository = require('../repositories/book_repository');
+ const auditRepository = require('../repositories/audit_repository');
  const i18n = require('../utils/i18n/i18n'); // Inyección del gestor de idiomas
  
  /**
@@ -101,6 +102,16 @@
              // Eliminar registro en base de datos
              await bookRepository.delete(id, userId);
  
+             // Registrar la auditoria sin esperar a que finalice la escritura
+             void auditRepository.create({
+                 user_id: userId,
+                 action: 'DELETE_BOOK',
+                 target: String(id),
+                 ip_address: req.ip || null
+             }).catch(error => {
+                 console.error('[Audit] No se pudo registrar DELETE_BOOK:', error);
+             });
+
              // Eliminar archivo físico en disco de forma síncrona
              fileHelper.deleteFile(book.file_path); 
              

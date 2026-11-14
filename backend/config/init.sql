@@ -50,6 +50,16 @@ CREATE TABLE users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Sin clave foránea a users para conservar la auditoría al eliminar usuarios.
+CREATE TABLE audit_logs (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    action VARCHAR(50) NOT NULL,
+    target VARCHAR(255) NOT NULL,
+    ip_address VARCHAR(45),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 /*
  * @brief 5. Relación Muchos a Muchos (N:M)
  * @details Tabla intermedia o pivot. 
@@ -109,6 +119,18 @@ INSERT INTO users_roles (user_id, role_id) VALUES (2, 2);
  */
 
 DELIMITER //
+
+-- Guarda tanto el borrado de usuarios como borrado de libros.
+CREATE PROCEDURE sp_create_audit_log(
+    IN p_user_id INT,
+    IN p_action VARCHAR(50),
+    IN p_target VARCHAR(255),
+    IN p_ip_address VARCHAR(45)
+)
+BEGIN
+    INSERT INTO audit_logs (user_id, action, target, ip_address)
+    VALUES (p_user_id, p_action, p_target, p_ip_address);
+END //
 
 -- --- PROCEDIMIENTOS PARA USERS ---
 

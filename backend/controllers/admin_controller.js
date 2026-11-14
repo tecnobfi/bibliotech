@@ -9,6 +9,7 @@
 
  const userRepository = require('../repositories/user_repository');
  const bookRepository = require('../repositories/book_repository');
+ const auditRepository = require('../repositories/audit_repository');
  const fileHelper = require('../utils/file_helper/file_helper');
  const i18n = require('../utils/i18n/i18n'); // Inyección del gestor de idiomas
  
@@ -70,6 +71,16 @@
                  return res.status(404).json({ message });
              }
  
+             // Registrar la auditoria sin esperar a que finalice la escritura
+             void auditRepository.create({
+                 user_id: adminId,
+                 action: 'DELETE_USER',
+                 target: String(targetUserId),
+                 ip_address: req.ip || null
+             }).catch(error => {
+                 console.error('[Audit] No se pudo registrar DELETE_USER:', error);
+             });
+
              // Limpieza física: Eliminar almacenamiento en disco
              userBooks.forEach(book => {fileHelper.deleteFile(book.file_path);});
  
