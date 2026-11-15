@@ -40,6 +40,13 @@
   * @brief Eliminar un documento por su ID.
   */
  router.delete('/:id', bookController.deleteBook);
- // Ruta protegida para actualizar metadatos por ID de documento
-router.put('/:id',authMiddleware,updateBook);
+ 
+ /**
+  * @route PUT /api/books/:id
+  * @brief Actualizar los metadatos de un documento por su ID.
+  * @note No hace falta volver a pasar verifyToken: ya se aplica a todas las rutas
+  * de este router con router.use(verifyToken).
+  */
+ router.put('/:id', bookController.updateBook);
+
  module.exports = router;

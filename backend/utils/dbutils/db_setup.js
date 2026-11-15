@@ -36,7 +36,7 @@
              multipleStatements: true // Habilitar múltiples consultas en una sola llamada
          });
          
-         const sqlPath = path.join(__dirname, '../config/init.sql');
+         const sqlPath = path.join(__dirname, '../../config/init.sql');
          const sqlContent = fs.readFileSync(sqlPath, 'utf8');
  
          console.log("📂 Leyendo init.sql y limpiando sintaxis del cliente (DELIMITER)...");
