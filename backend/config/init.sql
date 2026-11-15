@@ -210,3 +210,31 @@ END //
 
 DELIMITER ;
 SET foreign_key_checks = 1;
+
+CREATE TABLE IF NOT EXISTS categories (
+     id INT AUTO_INCREMENT PRIMARY KEY, 
+     name VARCHAR(50) NOT NULL UNIQUE );
+
+INSERT INTO categories (name) VALUES 
+ ('Ingeniería'), 
+ ('Matemática'), 
+ ('Programación'), 
+ ('Bases de Datos'), 
+ ('Redes');
+
+ DELIMITER $$ 
+ CREATE PROCEDURE sp_get_all_categories() 
+
+ BEGIN 
+
+ SELECT id, 
+ name FROM categories
+ ORDER BY name ASC; 
+
+ END$$ 
+
+ DELIMITER ;
+
+  ALTER TABLE books ADD COLUMN category_id INT;
+  ALTER TABLE books ADD CONSTRAINT fk_books_categories 
+  FOREIGN KEY (category_id) REFERENCES categories(id);

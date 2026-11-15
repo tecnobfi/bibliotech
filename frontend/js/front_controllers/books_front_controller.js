@@ -7,20 +7,26 @@
  * @date Octubre 2026
  */
 
- document.addEventListener('DOMContentLoaded', loadBooks);
+document.addEventListener('DOMContentLoaded', async () =>
+{
+    await loadBooks();
+    await loadCategoriesSelect(); // <-- Agregamos esta línea aquí
+});
 
- async function loadBooks() 
- {
-     try 
-     {
-         const books = await apiService.request('/books/my-books', 'GET');
-         renderBooksTable(books);
-     } 
-     catch (error) 
-     {
-         showModal('Error', 'No se pudieron cargar los documentos: ' + error.message);
-     }
- }
+
+async function loadBooks()
+{
+    try
+    {
+        const books = await apiService.request('/books/my-books', 'GET');
+
+        renderBooksTable(books);
+    }
+    catch (error)
+    {
+        showModal('Error', 'No se pudieron cargar los documentos: ' + error.message);
+    }
+}
  
  function renderBooksTable(books) 
  {
@@ -143,3 +149,46 @@
         }
      });
  }
+
+ /**
+ * Carga las categorías desde la API y puebla el elemento desplegable
+ * sin utilizar innerHTML.
+ */
+async function loadCategoriesSelect()
+{
+    try
+    {
+        const categories = await apiService.request('/categories', 'GET');
+
+        const selectElement = document.getElementById('category');
+
+        if (!selectElement)
+        {
+            return;
+        }
+
+        // Limpiar contenido previo respetando Zero-innerHTML
+        selectElement.replaceChildren();
+
+        // Opción por defecto
+        const defaultOption = document.createElement('option');
+        defaultOption.value = '';
+        defaultOption.textContent = 'Seleccione una categoría...';
+
+        selectElement.appendChild(defaultOption);
+
+        // Generar nodos de opción nativos
+        categories.forEach(cat =>
+        {
+            const option = document.createElement('option');
+            option.value = cat.id;
+            option.textContent = cat.name;
+
+            selectElement.appendChild(option);
+        });
+    }
+    catch (error)
+    {
+        console.error('Error al poblar el desplegable de categorías:', error);
+    }
+}
