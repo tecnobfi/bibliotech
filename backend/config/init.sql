@@ -264,3 +264,76 @@ BEGIN
 END$$
 
 DELIMITER ;  
+
+/*
+ * ==========================================================
+ * 10. MÓDULO DE TRAZABILIDAD Y AUDITORÍA (Requerimiento B)
+ * ==========================================================
+ *
+ * @brief Tabla de registros de auditoría (Audit Log).
+ * @details Persiste en la base de datos las acciones críticas del sistema
+ * (ej: DELETE_BOOK, DELETE_USER) para permitir un análisis forense posterior,
+ * en lugar de depender de console.log, que se pierde al reiniciar el servidor.
+ *
+ * @note Decisión de diseño: user_id NO tiene Clave Foránea hacia users.
+ * Si usáramos FOREIGN KEY ... ON DELETE CASCADE, al borrar un usuario se
+ * borraría también todo su historial de auditoría, que es justamente la
+ * evidencia que queremos conservar. Un log forense debe sobrevivir a la
+ * eliminación de las entidades que describe.
+ *
+ * @note target guarda una referencia textual al recurso afectado
+ * (ej: 'book:15', 'user:3') para que el registro siga siendo legible aunque
+ * el recurso ya no exista.
+ *
+ * @note ip_address es VARCHAR(45) para soportar tanto IPv4 como IPv6.
+ */
+CREATE TABLE IF NOT EXISTS audit_logs (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NULL,
+    action VARCHAR(50) NOT NULL,
+    target VARCHAR(255) NOT NULL,
+    ip_address VARCHAR(45) NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_audit_logs_user_id (user_id),
+    INDEX idx_audit_logs_created_at (created_at)
+);
+
+DELIMITER //
+
+/*
+ * @brief Registra un nuevo evento de auditoría.
+ * @param p_user_id ID del usuario que ejecuta la acción (el actor).
+ * @param p_action Código de la acción realizada (ej: 'DELETE_BOOK', 'DELETE_USER').
+ * @param p_target Recurso afectado por la acción (ej: 'book:15').
+ * @param p_ip_address IP de origen de la petición (opcional, puede ser NULL).
+ * @note Seguridad: el usuario 'bibliotech' de la app solo tiene permisos
+ * SELECT y EXECUTE. No puede hacer INSERT directo sobre audit_logs, solo a
+ * través de este procedimiento (Principio de Menor Privilegio).
+ */
+CREATE PROCEDURE sp_create_audit_log(
+    IN p_user_id INT,
+    IN p_action VARCHAR(50),
+    IN p_target VARCHAR(255),
+    IN p_ip_address VARCHAR(45)
+)
+BEGIN
+    INSERT INTO audit_logs (user_id, action, target, ip_address)
+    VALUES (p_user_id, p_action, p_target, p_ip_address);
+    SELECT LAST_INSERT_ID() as insertId;
+END //
+
+/*
+ * @brief Lista el historial de auditoría, del evento más reciente al más antiguo.
+ * @details Se usa LEFT JOIN (y no JOIN) con users para que los eventos de
+ * usuarios que ya fueron eliminados sigan apareciendo en el historial;
+ * en ese caso username llega como NULL.
+ */
+CREATE PROCEDURE sp_find_all_audit_logs()
+BEGIN
+    SELECT a.id, a.user_id, u.username, a.action, a.target, a.ip_address, a.created_at
+    FROM audit_logs a
+    LEFT JOIN users u ON a.user_id = u.id
+    ORDER BY a.created_at DESC, a.id DESC;
+END //
+
+DELIMITER ;
