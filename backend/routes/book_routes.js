@@ -12,7 +12,7 @@
  const bookController = require('../controllers/book_controller');
  const uploadMiddleware = require('../config/multer_config');
  const { verifyToken } = require('../middleware/auth_middleware');
- const { validateBookUpload } = require('../middleware/validation_middleware');
+ const { validateBookUpload, validateBookUpdate } = require('../middleware/validation_middleware'); // Asegúrate de tener o exportar validateBookUpdate, o usa tus validaciones de campos requeridos
  
  /**
   * @brief Todas las rutas de la biblioteca son privadas y requieren una sesión activa.
@@ -34,6 +34,12 @@
   * @brief Obtener la biblioteca completa del cliente autenticado.
   */
  router.get('/my-books', bookController.getMyBooks);
+ 
+ /**
+  * @route PUT /api/books/:id
+  * @brief Actualizar los metadatos de un documento existente sin re-subir el PDF.
+  */
+ router.put('/:id', bookController.updateBookMetadata);
  
  /**
   * @route DELETE /api/books/:id
