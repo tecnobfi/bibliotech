@@ -158,10 +158,16 @@ BEGIN
     JOIN roles r ON ur.role_id = r.id;
 END //
 
--- Borrar usuario por ID
+/*
+ * @brief Borrar usuario por ID.
+ * @return affectedRows Cantidad de usuarios eliminados (0 si el ID no existía).
+ * @note ROW_COUNT() devuelve las filas afectadas por el último DELETE. Lo retornamos
+ * para que la capa de repositorio pueda distinguir un borrado real de un ID inexistente.
+ */
 CREATE PROCEDURE sp_delete_user(IN p_id INT)
 BEGIN
     DELETE FROM users WHERE id = p_id;
+    SELECT ROW_COUNT() as affectedRows;
 END //
 
 -- --- PROCEDIMIENTOS PARA BOOKS ---

@@ -56,7 +56,7 @@
      /**
       * @brief Elimina permanentemente una cuenta de usuario del sistema.
       * @param {number} id - Identificador de la cuenta a eliminar.
-      * @returns {Promise<boolean>} Confirmación de éxito.
+      * @returns {Promise<boolean>} true si se eliminó la cuenta, false si el ID no existía.
       * 
       * @note La integridad referencial en la base de datos (ON DELETE CASCADE) 
       * se encargará automáticamente de borrar los registros de la tabla intermedia 
@@ -64,8 +64,10 @@
       */
      async delete(id) 
      {
-         await db.execute('CALL sp_delete_user(?)', [id]);
-         return true;
+         const [rows] = await db.execute('CALL sp_delete_user(?)', [id]);
+
+         // sp_delete_user devuelve ROW_COUNT(): si es 0, no había ningún usuario con ese ID
+         return rows[0][0].affectedRows > 0;
      }
  }
  
