@@ -40,6 +40,15 @@
  });
  
  /**
+  * @brief Panel de Auditoría (Requerimiento B).
+  * @note Servir el HTML es público, pero los datos no: audit_front_controller.js los pide a
+  * GET /api/audit/logs, que exige token y rol admin. Sin permisos, la tabla nunca se llena.
+  */
+ router.get('/audit_dashboard', (req, res) => {
+     res.sendFile(path.join(__dirname, '../../frontend/html/audit_dashboard.html'));
+ });
+ 
+ /**
   * @brief Middleware "Catch-All" (Atrapa-todo) para el manejo de Errores 404 en la UI.
   * @details Al ubicarse al final del archivo, cualquier petición GET que no coincida 
   * con las rutas anteriores caerá aquí. 

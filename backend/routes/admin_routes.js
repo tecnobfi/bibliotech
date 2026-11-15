@@ -10,6 +10,8 @@
  const express = require('express');
  const router = express.Router();
  const adminController = require('../controllers/admin_controller');
+ const auditController = require('../controllers/audit_controller');
+ const { auditAction } = require('../middleware/audit_middleware');
  
  // Importamos los middlewares centralizados de seguridad
  const { verifyToken, isAdmin } = require('../middleware/auth_middleware');
@@ -34,7 +36,8 @@
   * @route DELETE /api/admin/users/:id
   * @brief Eliminar un usuario del sistema por su ID (incluyendo borrado en cascada).
   * @param id Identificador único del usuario (URL param).
+  * @note auditAction registra automáticamente el evento DELETE_USER si el borrado fue exitoso.
   */
- router.delete('/users/:id', adminController.deleteUser);
+ router.delete('/users/:id', auditAction(auditController.ACTIONS.DELETE_USER, 'user'), adminController.deleteUser);
  
  module.exports = router;
