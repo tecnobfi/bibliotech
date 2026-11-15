@@ -50,6 +50,16 @@ CREATE TABLE users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Sin clave foránea a users para conservar la auditoría al eliminar usuarios.
+CREATE TABLE audit_logs (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    action VARCHAR(50) NOT NULL,
+    target VARCHAR(255) NOT NULL,
+    ip_address VARCHAR(45),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 /*
  * @brief 5. Relación Muchos a Muchos (N:M)
  * @details Tabla intermedia o pivot. 
@@ -74,11 +84,17 @@ CREATE TABLE books (
     filename VARCHAR(255) NOT NULL,
     title VARCHAR(100) NOT NULL,
     author VARCHAR(100) NOT NULL,
-    category VARCHAR(50),
+    category_id int NOT NULL,
     pages INT DEFAULT 0,
     file_path VARCHAR(255) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (category_id) REFERENCES category(id) ON DELETE CASCADE
+);
+
+CREATE TABLE category (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL UNIQUE
 );
 
 -- 7. Inserción de Roles Maestros
@@ -95,6 +111,8 @@ INSERT INTO users_roles (user_id, role_id) VALUES (1, 1);
 INSERT INTO users (id, username, password) VALUES (2, 'pepe', '$2b$10$.n0s847tiSxBqDvIo6Vg5ujXC5zIUmm98bTjBWnRdqX9CxxbIo7wS');
 INSERT INTO users_roles (user_id, role_id) VALUES (2, 2); 
 
+INSERT INTO category (name) VALUES ('Novela'), ('Ciencia Ficcion'), ('Tecnico/Academico'), ('Historia'), ('Poesia');
+
 
 /*
  * ==========================================================
@@ -109,6 +127,18 @@ INSERT INTO users_roles (user_id, role_id) VALUES (2, 2);
  */
 
 DELIMITER //
+
+-- Guarda tanto el borrado de usuarios como borrado de libros.
+CREATE PROCEDURE sp_create_audit_log(
+    IN p_user_id INT,
+    IN p_action VARCHAR(50),
+    IN p_target VARCHAR(255),
+    IN p_ip_address VARCHAR(45)
+)
+BEGIN
+    INSERT INTO audit_logs (user_id, action, target, ip_address)
+    VALUES (p_user_id, p_action, p_target, p_ip_address);
+END //
 
 -- --- PROCEDIMIENTOS PARA USERS ---
 
@@ -174,20 +204,23 @@ CREATE PROCEDURE sp_create_book(
     IN p_filename VARCHAR(255),
     IN p_title VARCHAR(100),
     IN p_author VARCHAR(100),
-    IN p_category VARCHAR(50),
+    IN p_category_id INT,
     IN p_pages INT,
     IN p_file_path VARCHAR(255)
 )
 BEGIN
-    INSERT INTO books (user_id, filename, title, author, category, pages, file_path)
-    VALUES (p_user_id, p_filename, p_title, p_author, p_category, p_pages, p_file_path);
+    INSERT INTO books (user_id, filename, title, author, category_id, pages, file_path)
+    VALUES (p_user_id, p_filename, p_title, p_author, p_category_id, p_pages, p_file_path);
     SELECT LAST_INSERT_ID() as insertId;
 END //
 
 -- Listar libros asociados a un usuario específico
 CREATE PROCEDURE sp_find_books_by_user(IN p_user_id INT)
 BEGIN
-    SELECT * FROM books WHERE user_id = p_user_id;
+    SELECT b.id, b.user_id, b.filename, b.title, b.author, b.category_id, c.name as category, b.pages, b.file_path, b.created_at
+    FROM books b
+    JOIN category c ON b.category_id = c.id
+    WHERE b.user_id = p_user_id;
 END //
 
 /*
@@ -197,7 +230,42 @@ END //
  */
 CREATE PROCEDURE sp_find_book_by_id(IN p_id INT, IN p_user_id INT)
 BEGIN
-    SELECT * FROM books WHERE id = p_id AND user_id = p_user_id;
+    SELECT b.id, b.user_id, b.filename, b.title, b.author, b.category_id, c.name as category, b.pages, b.file_path, b.created_at
+    FROM books b
+    JOIN category c ON b.category_id = c.id
+    WHERE b.id = p_id AND b.user_id = p_user_id;
+END //
+
+/*
+ * @brief Actualiza los metadatos de un libro existente.
+ * @details Permite modificar titulo, autor, categoria y paginas
+ * sin alterar el archivo PDF almacenado.
+ * @note Seguridad: Solo actualiza libros pertenecientes al usuario.
+ * @param p_id Identificador del libro.
+ * @param p_user_id Identificador del usuario autenticado.
+ * @param p_title Nuevo titulo.
+ * @param p_author Nuevo autor.
+ * @param p_category_id Nueva categoria.
+ * @param p_pages Nueva cantidad de paginas.
+ */
+CREATE PROCEDURE sp_update_book_metadata(
+    IN p_id INT,
+    IN p_user_id INT,
+    IN p_title VARCHAR(100),
+    IN p_author VARCHAR(100),
+    IN p_category_id INT,
+    IN p_pages INT
+)
+BEGIN
+    UPDATE books
+    SET
+        title = p_title,
+        author = p_author,
+        category_id = p_category_id,
+        pages = p_pages
+    WHERE id = p_id AND user_id = p_user_id;
+
+    SELECT ROW_COUNT() AS affectedRows;
 END //
 
 /*
@@ -206,6 +274,43 @@ END //
 CREATE PROCEDURE sp_delete_book(IN p_id INT, IN p_user_id INT)
 BEGIN
     DELETE FROM books WHERE id = p_id AND user_id = p_user_id;
+END //
+
+-- --- PROCEDIMIENTOS PARA CATEGORY ---
+
+/*
+ * @brief 10. Muestra todas las categorias creadas
+ */
+CREATE PROCEDURE sp_find_all_categories()
+BEGIN
+    SELECT * FROM category;
+END //
+
+/*
+ * @brief Alias de compatibilidad con la consigna
+ */
+CREATE PROCEDURE sp_get_all_categories()
+BEGIN
+    SELECT * FROM category;
+END //
+
+/*
+ * @brief 11. Crea una nueva categoria
+ * @param p_name Nombre de la categoria
+ */
+CREATE PROCEDURE sp_create_category(IN p_name VARCHAR(100))
+BEGIN
+    INSERT INTO category (name) VALUES (p_name);
+    SELECT LAST_INSERT_ID() as insertId;
+END //
+
+/*
+ * @brief 12. Elimina una categoria por ID
+ * @param p_id Identificador de la categoria
+ */
+CREATE PROCEDURE sp_delete_category(IN p_id INT)
+BEGIN
+    DELETE FROM category WHERE id = p_id;
 END //
 
 DELIMITER ;

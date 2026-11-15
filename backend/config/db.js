@@ -1,3 +1,8 @@
+﻿/**
+ * @file db.js
+ * @brief ConfiguraciÃ³n y exportaciÃ³n del Pool de conexiones a MySQL.
+ * @project Bibliotech
+ * @author TecnologÃ­as InformÃ¡ticas B - Facultad de IngenierÃ­a - UNMdP
 /**
  * @file db.js
  * @brief Configuración y exportación del Pool de conexiones a MySQL.
@@ -28,9 +33,9 @@
      password: process.env.DB_PASS,
      database: process.env.DB_NAME,
      waitForConnections: true,
-     connectionLimit: 10, // Máximo de conexiones simultáneas permitidas
+     connectionLimit: 10, // MÃ¡ximo de conexiones simultÃ¡neas permitidas
      queueLimit: 0
  });
- 
+
  // Exportamos la promesa del pool para poder utilizar async/await en la capa de Repositorios
  module.exports = pool.promise();

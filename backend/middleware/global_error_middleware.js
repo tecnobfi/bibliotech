@@ -14,62 +14,68 @@
  * flujo normal, sino una "red de seguridad" que solo se ejecuta cuando otro 
  * componente llama a next(error) o lanza una excepción no capturada.
  */
- const i18n = require('../utils/i18n/i18n');
+const i18n = require('../utils/i18n/i18n');
 
- /**
-  * @brief Atrapa excepciones globales, traduce el error a un mensaje amigable y evita que el servidor colapse.
-  * @param {Error} err - Objeto de error nativo o personalizado capturado por la aplicación.
-  * @param {Object} req - Objeto de petición HTTP.
-  * @param {Object} res - Objeto de respuesta HTTP.
-  * @param {Function} next - Función para pasar el control (rara vez usada aquí, ya que este es el final del ciclo).
-  */
- const globalErrorMiddleware = (err, req, res, next) => 
- {
-     // Registro del error en el servidor para propósitos de auditoría y depuración.
-     console.error(`[Error Handler] Detalle:`, err.stack || err);
- 
-     // 1. Errores específicos del driver de MySQL (Base de Datos)
-     if (err.code) 
-     {
-         if (err.code === 'ER_DUP_ENTRY') 
-         {
-             const message = i18n.getMessage('CT_MYSQL_ER_DUP_ENTRY');
-             return res.status(409).json({ message });
-         }
- 
-         if (err.code === 'ECONNREFUSED') 
-         {
-             const message = i18n.getMessage('CT_MYSQL_ECONNREFUSED');
-             return res.status(500).json({ message });
-         }
-     }
- 
-     // 2. Errores de la librería de carga de archivos (Multer)
-     if (err.name === 'MulterError') 
-     {
-         const message = i18n.getMessage('CT_ERR_MULTER_GENERIC');
-         return res.status(400).json({ message });
-     }
- 
-     if (err.message && err.message.includes('Only PDF files')) 
-     {
-         const message = i18n.getMessage('CT_ERR_MULTER_PDF');
-         return res.status(400).json({ message });
-     }
- 
-     // 3. Errores genéricos HTTP o contingencias internas del sistema
-     const statusCode = err.statusCode || 500;
-     const message = i18n.getMessage('CT_ERR_INTERNAL');
- 
-     /**
-      * @note Seguridad en Producción: Nunca se debe enviar el 'err.stack' (trazabilidad del código) 
-      * al cliente en un entorno de producción, ya que expone la estructura interna del servidor 
-      * y facilita ataques de inyección o reconocimiento.
-      */
-     res.status(statusCode).json({
-         message: statusCode === 500 ? message : err.message,
-         error: process.env.NODE_ENV === 'development' ? err.stack : undefined
-     });
- };
- 
- module.exports = globalErrorMiddleware;
+/**
+ * @brief Atrapa excepciones globales, traduce el error a un mensaje amigable y evita que el servidor colapse.
+ * @param {Error} err - Objeto de error nativo o personalizado capturado por la aplicación.
+ * @param {Object} req - Objeto de petición HTTP.
+ * @param {Object} res - Objeto de respuesta HTTP.
+ * @param {Function} next - Función para pasar el control (rara vez usada aquí, ya que este es el final del ciclo).
+ */
+const globalErrorMiddleware = (err, req, res, next) => 
+{
+    // Registro del error en el servidor para propósitos de auditoría y depuración.
+    console.error(`[Error Handler] Detalle:`, err.stack || err);
+
+    // 1. Errores específicos del driver de MySQL (Base de Datos)
+    if (err.code) 
+    {
+        if (err.code === 'ER_DUP_ENTRY') 
+        {
+            const message = i18n.getMessage('CT_MYSQL_ER_DUP_ENTRY');
+            return res.status(409).json({ message });
+        }
+
+        if (err.code === 'ER_ROW_IS_REFERENCED_2')
+        {
+            const message = i18n.getMessage('CT_MYSQL_ER_ROW_IS_REFERENCED');
+            return res.status(409).json({ message });
+        }
+
+        if (err.code === 'ECONNREFUSED') 
+        {
+            const message = i18n.getMessage('CT_MYSQL_ECONNREFUSED');
+            return res.status(500).json({ message });
+        }
+    }
+
+    // 2. Errores de la librería de carga de archivos (Multer)
+    if (err.name === 'MulterError') 
+    {
+        const message = i18n.getMessage('CT_ERR_MULTER_GENERIC');
+        return res.status(400).json({ message });
+    }
+
+    if (err.message && err.message.includes('Only PDF files')) 
+    {
+        const message = i18n.getMessage('CT_ERR_MULTER_PDF');
+        return res.status(400).json({ message });
+    }
+
+    // 3. Errores genéricos HTTP o contingencias internas del sistema
+    const statusCode = err.statusCode || 500;
+    const message = i18n.getMessage('CT_ERR_INTERNAL');
+
+    /**
+     * @note Seguridad en Producción: Nunca se debe enviar el 'err.stack' (trazabilidad del código) 
+     * al cliente en un entorno de producción, ya que expone la estructura interna del servidor 
+     * y facilita ataques de inyección o reconocimiento.
+     */
+    res.status(statusCode).json({
+        message: statusCode === 500 ? message : err.message,
+        error: process.env.NODE_ENV === 'development' ? err.stack : undefined
+    });
+};
+
+module.exports = globalErrorMiddleware;

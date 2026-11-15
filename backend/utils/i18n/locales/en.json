@@ -11,6 +11,9 @@
     "CT_REQ_TITLE": "Document title is required.",
     "CT_REQ_AUTHOR": "Author name is required.",
     "CT_REQ_CATEGORY": "You must select a valid category.",
+    "CT_REQ_CATEGORY_NAME": "Category name is required.",
+    "CT_REQ_CATEGORY_ID": "Category identifier is required.",
+    "CT_CATEGORY_ID_POSITIVE": "Category identifier must be a positive number.",
     "CT_PAGES_POSITIVE": "The number of pages must be greater than zero.",
     "CT_ERR_MULTER_GENERIC": "An error occurred while processing the uploaded file.",
     "CT_ERR_MULTER_PDF": "Invalid file type. Only PDF files are allowed.",
@@ -26,5 +29,9 @@
     "CT_AUTH_LOGIN_SUCCESS": "Login successful.",
     "CT_BOOK_UPLOAD_SUCCESS": "PDF document successfully uploaded to the library.",
     "CT_BOOK_NOT_FOUND": "The document does not exist or you do not have permission to delete it.",
-    "CT_BOOK_DELETED_SUCCESS": "Record deleted and physical file successfully removed."
+    "CT_BOOK_DELETED_SUCCESS": "Record deleted and physical file successfully removed.",
+    "CT_CATEGORY_CREATED": "Category created successfully.",
+    "CT_CATEGORY_DELETED": "Category deleted successfully.",
+    "CT_CATEGORY_NOT_FOUND": "Category not found.",
+    "CT_MYSQL_ER_ROW_IS_REFERENCED": "Cannot delete category because it has associated books."
 }
