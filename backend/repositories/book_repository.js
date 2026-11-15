@@ -73,6 +73,33 @@
          await db.execute('CALL sp_delete_book(?, ?)', [id, userId]);
          return true;
      }
+     
+     /**
+ * @brief Modifica los metadatos de un documento existente previa validación de pertenencia.
+ *
+ * @param {number} bookId - ID (Primary Key) del libro a modificar.
+ * @param {number} ownerId - ID del usuario propietario del libro.
+ * @param {string} title - Nuevo título del libro.
+ * @param {string} author - Nuevo autor del libro.
+ * @param {number} pages - Nueva cantidad de páginas.
+ * @param {number} categoryId - ID de la nueva categoría asociada.
+ * @returns {Promise<boolean>} Retorna true si la ejecución finalizó sin excepciones.
+ */
+async updateMetadata(bookId, ownerId, title, author, pages, categoryId) {
+    await db.execute(
+        'CALL sp_update_book_metadata(?, ?, ?, ?, ?, ?)',
+        [
+            bookId,
+            ownerId,
+            title,
+            author,
+            pages,
+            categoryId
+        ]
+    );
+
+    return true;
+}
  }
  
  module.exports = new BookRepository();

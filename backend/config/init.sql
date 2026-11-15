@@ -238,3 +238,29 @@ INSERT INTO categories (name) VALUES
   ALTER TABLE books ADD COLUMN category_id INT;
   ALTER TABLE books ADD CONSTRAINT fk_books_categories 
   FOREIGN KEY (category_id) REFERENCES categories(id);
+
+  DELIMITER $$
+
+CREATE PROCEDURE sp_update_book_metadata(
+    IN p_book_id INT,
+    IN p_owner_id INT,
+    IN p_title VARCHAR(150),
+    IN p_author VARCHAR(100),
+    IN p_pages INT,
+    IN p_category_id INT
+)
+BEGIN
+    -- Actualiza los metadatos garantizando la propiedad del documento (owner_id)
+    UPDATE books
+    SET
+        displayname = p_title,
+        author = p_author,
+        pages = p_pages,
+        category_id = p_category_id
+    WHERE
+        id = p_book_id
+        AND owner_id = p_owner_id;
+
+END$$
+
+DELIMITER ;  
