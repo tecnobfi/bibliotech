@@ -12,7 +12,7 @@
  const bookController = require('../controllers/book_controller');
  const uploadMiddleware = require('../config/multer_config');
  const { verifyToken } = require('../middleware/auth_middleware');
- const { validateBookUpload } = require('../middleware/validation_middleware');
+ const { validateBookUpload, validateBookUpdate } = require('../middleware/validation_middleware');
  
  /**
   * @brief Todas las rutas de la biblioteca son privadas y requieren una sesión activa.
@@ -39,6 +39,16 @@
   * @route DELETE /api/books/:id
   * @brief Eliminar un documento por su ID.
   */
+
+
+ /**
+  * @route PUT /api/books/:id
+  * @brief Actualiza los metadatos de un libro existente.
+  * @details Requiere autenticacion y valida los datos antes
+  * de permitir la actualizacion.
+  */
+ router.put('/:id', validateBookUpdate, bookController.updateBook);
+
  router.delete('/:id', bookController.deleteBook);
  
  module.exports = router;
