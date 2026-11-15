@@ -11,6 +11,9 @@
     "CT_REQ_TITLE": "El título del documento es obligatorio.",
     "CT_REQ_AUTHOR": "El nombre del autor es obligatorio.",
     "CT_REQ_CATEGORY": "Debe seleccionar una categoría válida.",
+    "CT_REQ_CATEGORY_NAME": "El nombre de la categoría es obligatorio.",
+    "CT_REQ_CATEGORY_ID": "El identificador de categoría es obligatorio.",
+    "CT_CATEGORY_ID_POSITIVE": "El identificador de categoría debe ser un número positivo.",
     "CT_PAGES_POSITIVE": "La cantidad de páginas debe ser un número mayor a cero.",
     "CT_ERR_MULTER_GENERIC": "Ocurrió un error al procesar el archivo subido.",
     "CT_ERR_MULTER_PDF": "Tipo de archivo inválido. Solo se permiten archivos PDF.",
@@ -26,5 +29,9 @@
     "CT_AUTH_LOGIN_SUCCESS": "Login exitoso.",
     "CT_BOOK_UPLOAD_SUCCESS": "Documento PDF cargado exitosamente en la biblioteca.",
     "CT_BOOK_NOT_FOUND": "El documento no existe o no tienes permisos para eliminarlo.",
-    "CT_BOOK_DELETED_SUCCESS": "Registro eliminado y archivo físico removido con éxito."
+    "CT_BOOK_DELETED_SUCCESS": "Registro eliminado y archivo físico removido con éxito.",
+    "CT_CATEGORY_CREATED": "Categoría creada exitosamente.",
+    "CT_CATEGORY_DELETED": "Categoría eliminada con éxito.",
+    "CT_CATEGORY_NOT_FOUND": "La categoría no existe.",
+    "CT_MYSQL_ER_ROW_IS_REFERENCED": "No se puede eliminar la categoría porque tiene libros asociados."
 }
