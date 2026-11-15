@@ -112,6 +112,41 @@
              next(error);
          }
      }
+  /**
+ 
+@brief Procesa la solicitud HTTP PUT para actualizar los metadatos de un libro.
+@param {Object} req - Petición HTTP Express.
+@param {Object} res - Respuesta HTTP Express.
+@param {Function} next - Función para delegar errores al Global Error Handler.*/
+async updateBook(req, res, next)
+{
+    try
+    {
+        const bookId = parseInt(req.params.id);
+        const ownerId = req.userId;
+
+        const { title, author, pages, categoryId } = req.body;
+
+        await bookRepository.updateMetadata(
+            bookId,
+            ownerId,
+            title,
+            author,
+            pages,
+            categoryId
+        );
+
+        const message = i18n.getMessage('CT_BOOK_UPDATE_SUCCESS');
+
+        res.status(200).json({ message });
+    }
+    catch (error)
+    {
+        next(error);
+    }
+}   
+     
+     
  }
  
  module.exports = new BookController();

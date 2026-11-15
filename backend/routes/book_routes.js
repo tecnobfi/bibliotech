@@ -40,5 +40,6 @@
   * @brief Eliminar un documento por su ID.
   */
  router.delete('/:id', bookController.deleteBook);
- 
+ // Ruta protegida para actualizar metadatos por ID de documento
+router.put('/:id',authMiddleware,updateBook);
  module.exports = router;
