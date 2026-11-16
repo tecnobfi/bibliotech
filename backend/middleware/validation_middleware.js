@@ -117,7 +117,34 @@
              }
              return res.status(400).json({ message: error.message });
          }
-     }
+     },
+
+     /**
+ * @brief Valida el cuerpo JSON de una edición de metadatos documentales.
+ * @note A diferencia de validateBookUpload no hay archivo que revertir:
+ * el PDF físico no participa en esta operación.
+ */
+    validateBookUpdate: (req, res, next) =>
+    {
+        const validator = new Validator();
+        const { title, author, category_id, pages } = req.body;
+
+        try
+        {
+            validator.validateThis(title).with(new Required("CT_REQ_TITLE"));
+            validator.validateThis(author).with(new Required("CT_REQ_AUTHOR"));
+            validator.validateThis(category_id)
+                    .with(new Required("CT_REQ_CATEGORY"))
+                    .with(new PositiveNumber("CT_REQ_CATEGORY"));
+            validator.validateThis(pages).with(new PositiveNumber("CT_PAGES_POSITIVE"));
+
+            next();
+        }
+        catch (error)
+        {
+            return res.status(400).json({ message: error.message });
+        }
+    },
  };
  
  module.exports = validationMiddleware;

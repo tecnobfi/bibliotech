@@ -18,6 +18,13 @@
   * @brief Todas las rutas de la biblioteca son privadas y requieren una sesión activa.
   */
  router.use(verifyToken);
+
+ /**
+ * @route PUT /api/books/:id
+ * @brief Actualizar los metadatos de un documento (reemplazo completo).
+ * @note Se usa PUT y no PATCH porque la validación exige los cuatro campos.
+ */
+    router.put('/:id', validateBookUpdate, bookController.updateBook);
  
  /**
   * @route POST /api/books/upload

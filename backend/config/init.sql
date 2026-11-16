@@ -235,6 +235,34 @@ BEGIN
     SELECT * FROM books WHERE id = p_id AND user_id = p_user_id;
 END //
 
+/*Modificaciones*/
+
+/*
+ * @brief Actualiza los metadatos de un libro (sin tocar el archivo físico).
+ * @param p_id ID del libro a modificar.
+ * @param p_user_id ID del usuario solicitante.
+ * @note Seguridad (IDOR): la cláusula "AND user_id = p_user_id" hace que el
+ * UPDATE solo afecte filas del propietario. Si un cliente adivina el id de un
+ * libro ajeno, el UPDATE no encuentra coincidencias y no modifica nada.
+ * La verificación vive en la base y no solo en el controlador (defensa en profundidad).
+ */
+CREATE PROCEDURE sp_update_book_metadata(
+    IN p_id INT,
+    IN p_user_id INT,
+    IN p_title VARCHAR(100),
+    IN p_author VARCHAR(100),
+    IN p_pages INT,
+    IN p_category_id INT
+)
+BEGIN
+    UPDATE books
+    SET title = p_title,
+        author = p_author,
+        pages = p_pages,
+        category_id = p_category_id
+    WHERE id = p_id AND user_id = p_user_id;
+END //
+
 /*
  * @brief Borrar libro (Validando autoría)
  */

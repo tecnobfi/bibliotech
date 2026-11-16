@@ -112,6 +112,45 @@
              next(error);
          }
      }
+
+     /**
+ * @brief Modifica los metadatos de un documento sin re-subir el archivo PDF.
+ * @param {Object} req - Petición HTTP (params.id y body JSON con los metadatos).
+ * @param {Object} res - Respuesta HTTP.
+ * @param {Function} next - Función para delegar errores al Global Error Handler.
+ */
+async updateBook(req, res, next)
+{
+    try
+    {
+        const { id } = req.params;
+        const { title, author, category_id, pages } = req.body;
+        const userId = req.userId;
+
+        // Se verifica propiedad antes de escribir para poder responder 404 con precisión
+        const book = await bookRepository.findById(id, userId);
+
+        if (!book)
+        {
+            const message = i18n.getMessage('CT_BOOK_NOT_FOUND');
+            return res.status(404).json({ message });
+        }
+
+        await bookRepository.updateMetadata(id, userId, {
+            title: title.trim(),
+            author: author.trim(),
+            pages: parseInt(pages),
+            category_id: parseInt(category_id)
+        });
+
+        const message = i18n.getMessage('CT_BOOK_UPDATED_SUCCESS');
+        res.json({ message });
+    }
+    catch (error)
+    {
+        next(error);
+    }
+}
  }
  
  module.exports = new BookController();
