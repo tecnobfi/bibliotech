@@ -133,7 +133,7 @@ function renderBooksTable(books)
         {
             openEditBook(b);
         });
-        
+
         tdActions.append(btnEdit, btnDelete);
 
         row.append(tdTitle, tdAuthor, tdCategory, tdPages, tdReading, tdActions);
@@ -172,7 +172,7 @@ function openEditBook(book)
 {
     showEditBookModal(book, availableCategories, async (payload) =>
     {
-        await apiService.request(`/books/${book.id}`, 'PUT', payload);
+        await apiService.request(`/api/books/${book.id}`, 'PUT', payload);
         loadBooks();
     });
 }
