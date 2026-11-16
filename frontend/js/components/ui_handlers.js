@@ -135,3 +135,149 @@
      document.getElementById('pdfIframe').src = pdfUrl;
      modal.style.display = 'block';
  }
+
+ /**
+ * @brief Construye y muestra el modal de edición de metadatos de un documento.
+ * @details Los nodos se crean una sola vez (Singleton DOM) y en cada apertura
+ * se repueblan con los datos del libro. Zero innerHTML: todo valor del usuario
+ * ingresa mediante .value / textContent, nunca como HTML.
+ * @param {Object} book - Libro a editar (id, title, author, pages, category_id).
+ * @param {Array} categories - Lista de {id, name} para poblar el select.
+ * @param {Function} onSave - Callback asíncrono que recibe el payload; si lanza
+ * un error, este se muestra dentro del modal sin cerrarlo (el usuario conserva lo escrito).
+ */
+function showEditBookModal(book, categories, onSave)
+{
+    let modal = document.getElementById('editBookModal');
+
+    if (!modal)
+    {
+        modal = document.createElement('div');
+        modal.id = 'editBookModal';
+        modal.className = 'w3-modal';
+
+        const content = document.createElement('div');
+        content.className = 'w3-modal-content w3-card-4 w3-animate-zoom vault-card';
+        content.style.maxWidth = '450px';
+
+        const header = document.createElement('header');
+        header.className = 'w3-container w3-border-bottom';
+        const titleElem = document.createElement('h3');
+        titleElem.className = 'w3-text-teal';
+        titleElem.textContent = 'Editar documento';
+        header.appendChild(titleElem);
+
+        const form = document.createElement('form');
+        form.id = 'editBookForm';
+        form.className = 'w3-container w3-padding';
+
+        // Helper local: evita repetir 4 veces el par label + control
+        const addField = (labelText, control) =>
+        {
+            const label = document.createElement('label');
+            label.className = 'w3-margin-top w3-show';
+            label.textContent = labelText;
+            form.append(label, control);
+        };
+
+        const inputTitle = document.createElement('input');
+        inputTitle.id = 'editBookTitle';
+        inputTitle.type = 'text';
+        inputTitle.required = true;
+        inputTitle.className = 'w3-input w3-border w3-round w3-transparent w3-text-white';
+
+        const inputAuthor = document.createElement('input');
+        inputAuthor.id = 'editBookAuthor';
+        inputAuthor.type = 'text';
+        inputAuthor.required = true;
+        inputAuthor.className = 'w3-input w3-border w3-round w3-transparent w3-text-white';
+
+        const selectCategory = document.createElement('select');
+        selectCategory.id = 'editBookCategory';
+        selectCategory.className = 'w3-select w3-border w3-round w3-black w3-text-white';
+
+        const inputPages = document.createElement('input');
+        inputPages.id = 'editBookPages';
+        inputPages.type = 'number';
+        inputPages.min = '1';
+        inputPages.required = true;
+        inputPages.className = 'w3-input w3-border w3-round w3-transparent w3-text-white';
+
+        addField('Título del Documento', inputTitle);
+        addField('Autor', inputAuthor);
+        addField('Categoría', selectCategory);
+        addField('Páginas', inputPages);
+
+        const errorElem = document.createElement('p');
+        errorElem.id = 'editBookError';
+        errorElem.className = 'w3-text-red';
+
+        const btnCancel = document.createElement('button');
+        btnCancel.type = 'button';
+        btnCancel.className = 'w3-button w3-dark-grey w3-round w3-margin-right';
+        btnCancel.textContent = 'Cancelar';
+        btnCancel.addEventListener('click', () =>
+        {
+            modal.style.display = 'none';
+        });
+
+        const btnSave = document.createElement('button');
+        btnSave.type = 'submit';
+        btnSave.className = 'w3-button w3-teal w3-round';
+        btnSave.textContent = 'Guardar cambios';
+
+        const actions = document.createElement('div');
+        actions.className = 'w3-margin-top w3-margin-bottom';
+        actions.append(btnCancel, btnSave);
+
+        form.append(errorElem, actions);
+        content.append(header, form);
+        modal.appendChild(content);
+        document.body.appendChild(modal);
+    }
+
+    // Repoblado de los nodos existentes con los datos del libro actual
+    document.getElementById('editBookTitle').value = book.title;
+    document.getElementById('editBookAuthor').value = book.author;
+    document.getElementById('editBookPages').value = book.pages;
+    document.getElementById('editBookError').textContent = '';
+
+    const select = document.getElementById('editBookCategory');
+    select.replaceChildren();
+    categories.forEach(c =>
+    {
+        const option = document.createElement('option');
+        option.value = c.id;
+        option.textContent = c.name;
+        select.appendChild(option);
+    });
+    select.value = book.category_id;
+
+    /**
+     * @note Se reasigna onsubmit (no addEventListener) para que cada apertura
+     * tenga exactamente un manejador y no se acumulen listeners con el libro anterior.
+     */
+    document.getElementById('editBookForm').onsubmit = async (e) =>
+    {
+        e.preventDefault();
+
+        const payload = {
+            title: document.getElementById('editBookTitle').value,
+            author: document.getElementById('editBookAuthor').value,
+            category_id: Number(select.value),
+            pages: Number(document.getElementById('editBookPages').value)
+        };
+
+        try
+        {
+            await onSave(payload);
+            modal.style.display = 'none';
+        }
+        catch (error)
+        {
+            document.getElementById('editBookError').textContent = error.message;
+        }
+    };
+
+    modal.style.display = 'block';
+}

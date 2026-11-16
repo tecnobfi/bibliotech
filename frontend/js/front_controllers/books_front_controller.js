@@ -7,6 +7,9 @@
  * @date Octubre 2026
  */
 
+/** @brief Caché local de categorías, reutilizada por el modal de edición para no volver a pedirlas a la API. */
+let availableCategories = [];
+
 document.addEventListener('DOMContentLoaded', () =>
 {
     loadCategories();
@@ -24,6 +27,8 @@ async function loadCategories()
     {
         // 1. Ajustamos la ruta para que coincida con el server.js
         const categories = await apiService.request('/api/categories', 'GET');
+        availableCategories = categories; 
+
         const select = document.getElementById('category');
         
         // Limpiamos todo lo viejo
@@ -120,7 +125,16 @@ function renderBooksTable(books)
         {
             deleteBook(b.id);
         });
-        tdActions.appendChild(btnDelete);
+        
+        const btnEdit = document.createElement('button');
+        btnEdit.className = 'w3-button w3-blue w3-tiny w3-round w3-margin-right';
+        btnEdit.textContent = 'Editar';
+        btnEdit.addEventListener('click', () =>
+        {
+            openEditBook(b);
+        });
+        
+        tdActions.append(btnEdit, btnDelete);
 
         row.append(tdTitle, tdAuthor, tdCategory, tdPages, tdReading, tdActions);
         tbody.appendChild(row);
@@ -145,6 +159,22 @@ async function deleteBook(id)
     {
         showModal('Error', error.message);
     }
+}
+
+/**
+ * @brief Abre el modal de edición y envía los metadatos modificados al backend.
+ * @param {Object} book - Libro seleccionado en la tabla.
+ * @note El callback relanza los errores de la API: el modal los muestra
+ * en línea y permanece abierto para que el usuario corrija sin perder lo escrito.
+ */
+
+function openEditBook(book)
+{
+    showEditBookModal(book, availableCategories, async (payload) =>
+    {
+        await apiService.request(`/books/${book.id}`, 'PUT', payload);
+        loadBooks();
+    });
 }
 
 const uploadForm = document.getElementById('uploadForm');
