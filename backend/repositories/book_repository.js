@@ -31,9 +31,9 @@
       */
      async create(bookData) 
      {
-         const { user_id, filename, title, author, category, pages, file_path } = bookData;
-         const [rows] = await db.execute('CALL sp_create_book(?, ?, ?, ?, ?, ?, ?)',
-             [user_id, filename, title, author, category, pages, file_path]);
+            const { user_id, filename, title, author, category_id, pages, file_path } = bookData;
+        const [rows] = await db.execute('CALL sp_create_book(?, ?, ?, ?, ?, ?, ?)',
+        [user_id, filename, title, author, category_id, pages, file_path]);
              
          // Los Stored Procedures de inserción fueron diseñados para devolver LAST_INSERT_ID()
          return rows[0][0].insertId;

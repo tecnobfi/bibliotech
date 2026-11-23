@@ -1,4 +1,5 @@
 const categoryRepository = require('../repositories/category_repository');
+const i18n = require('../utils/i18n/i18n'); /*@nota: modificación*/
 
 class CategoryController
 {
@@ -18,6 +19,21 @@ class CategoryController
             next(error);
         }
     }
-}
 
+    async create(req, res, next)
+    {
+        try
+        {
+            const { name } = req.body;
+            const insertId = await categoryRepository.create(name.trim());
+
+            const message = i18n.getMessage('CT_CATEGORY_CREATED_SUCCESS');
+            res.status(201).json({ message, id: insertId, name: name.trim() });
+        }
+        catch (error)
+        {
+            next(error);
+        }
+    }
+}
 module.exports = new CategoryController();

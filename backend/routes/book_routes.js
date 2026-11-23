@@ -12,8 +12,7 @@
  const bookController = require('../controllers/book_controller');
  const uploadMiddleware = require('../config/multer_config');
  const { verifyToken } = require('../middleware/auth_middleware');
- const { validateBookUpload } = require('../middleware/validation_middleware');
- 
+ const { validateBookUpload, validateBookUpdate } = require('../middleware/validation_middleware');
  /**
   * @brief Todas las rutas de la biblioteca son privadas y requieren una sesión activa.
   */

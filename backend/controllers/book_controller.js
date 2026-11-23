@@ -27,21 +27,20 @@
      {
          try 
          {
-             const { title, author, category, pages } = req.body;
-             const userId = req.userId;
-             const filename = req.file.filename;
-             const filePath = `/uploads/${filename}`;
- 
-             // Persistencia de metadatos mediante Stored Procedure
-             const insertId = await bookRepository.create({
-                 user_id: userId,
-                 filename,
-                 title,
-                 author,
-                 category,
-                 pages: parseInt(pages) || 0,
-                 file_path: filePath
-             });
+            const { title, author, category_id, pages } = req.body;     /*@nota: Cambia a category_id*/
+            const userId = req.userId;
+            const filename = req.file.filename;
+            const filePath = `/uploads/${filename}`;
+
+            const insertId = await bookRepository.create({
+                user_id: userId,
+                filename,
+                title,
+                author,
+                category_id: parseInt(category_id),     /*nota: Pasa el string del form a INT*/
+                pages: parseInt(pages) || 0,
+                file_path: filePath
+            });
  
              const message = i18n.getMessage('CT_BOOK_UPLOAD_SUCCESS');
              res.status(201).json({ message, id: insertId, path: filePath });

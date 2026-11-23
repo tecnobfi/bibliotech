@@ -28,5 +28,7 @@
     "CT_BOOK_NOT_FOUND": "El documento no existe o no tienes permisos para eliminarlo.",
     "CT_BOOK_DELETED_SUCCESS": "Registro eliminado y archivo físico removido con éxito.",
     "CT_BOOK_UPDATED_SUCCESS": "Metadatos del documento actualizados con éxito.",
-    "CT_INVALID_CATEGORY": "La categoría seleccionada no existe."
+    "CT_INVALID_CATEGORY": "La categoría seleccionada no existe.",
+    "CT_REQ_CATEGORY_NAME": "El nombre de la categoría es obligatorio y debe tener al menos 2 caracteres.",
+    "CT_CATEGORY_CREATED_SUCCESS": "Categoría creada con éxito."
 }

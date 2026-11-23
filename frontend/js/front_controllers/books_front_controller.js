@@ -25,8 +25,7 @@ async function loadCategories()
 {
     try
     {
-        // 1. Ajustamos la ruta para que coincida con el server.js
-        const categories = await apiService.request('/api/categories', 'GET');
+        const categories = await apiService.request('/categories', 'GET');
         availableCategories = categories; 
 
         const select = document.getElementById('category');
@@ -62,8 +61,7 @@ async function loadBooks()
 {
     try 
     {
-        // CORRECCIÓN: Se agrega '/api' a la ruta
-        const books = await apiService.request('/api/books/my-books', 'GET');
+        const books = await apiService.request('/books/my-books', 'GET');
         renderBooksTable(books);
     } 
     catch (error) 
@@ -149,9 +147,8 @@ async function deleteBook(id)
     }
     
     try 
-    {
-        // CORRECCIÓN: Se agrega '/api' a la ruta
-        await apiService.request(`/api/books/${id}`, 'DELETE');
+    {        
+        await apiService.request(`/books/${id}`, 'DELETE');
         showModal('Eliminado', 'El documento ha sido borrado.');
         loadBooks();
     } 
@@ -172,7 +169,7 @@ function openEditBook(book)
 {
     showEditBookModal(book, availableCategories, async (payload) =>
     {
-        await apiService.request(`/api/books/${book.id}`, 'PUT', payload);
+        await apiService.request(`/books/${book.id}`, 'PUT', payload);
         loadBooks();
     });
 }
@@ -199,8 +196,6 @@ if (uploadForm)
         const formData = new FormData();
         formData.append('title', document.getElementById('title').value);
         formData.append('author', document.getElementById('author').value);
-        
-        // CORRECCIÓN: Ahora se envía category_id en lugar de category
         formData.append('category_id', document.getElementById('category').value);
         formData.append('pages', document.getElementById('pages').value);
         
@@ -209,9 +204,8 @@ if (uploadForm)
 
         try 
         {
-            // CORRECCIÓN: Se agrega '/api' a la ruta
             // Pasamos true como cuarto parámetro para indicar que enviamos FormData
-            await apiService.request('/api/books/upload', 'POST', formData, true);
+            await apiService.request('/books/upload', 'POST', formData, true);
             showModal('Éxito', 'Documento guardado e indexado correctamente.');
             uploadForm.reset();
             loadBooks();

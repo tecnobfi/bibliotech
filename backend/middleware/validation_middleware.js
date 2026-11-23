@@ -86,26 +86,26 @@
      validateBookUpload: (req, res, next) => 
      {
          const validator = new Validator();
-         const { title, author, category, pages } = req.body;
- 
-         try 
-         {
-             // Validación específica de presencia de archivo. 
-             // Multer procesa el archivo antes que este middleware valide los campos de texto.
-             if (!req.file) 
-             {
-                 throw new Error(validator.i18n.getMessage("CT_FILE_REQUIRED"));
-             }
- 
-             validator.validateThis(title).with(new Required("CT_REQ_TITLE"));
-             validator.validateThis(author).with(new Required("CT_REQ_AUTHOR"));
-             validator.validateThis(category).with(new Required("CT_REQ_CATEGORY"));
-             validator.validateThis(pages).with(new PositiveNumber("CT_PAGES_POSITIVE"));
- 
-             next();
-         } 
-         catch (error) 
-         {
+         const { title, author, category_id, pages } = req.body;
+
+        try 
+        {
+            if (!req.file) 
+            {
+                throw new Error(validator.i18n.getMessage("CT_FILE_REQUIRED"));
+            }
+
+            validator.validateThis(title).with(new Required("CT_REQ_TITLE"));
+            validator.validateThis(author).with(new Required("CT_REQ_AUTHOR"));
+            validator.validateThis(category_id)
+                     .with(new Required("CT_REQ_CATEGORY"))
+                     .with(new PositiveNumber("CT_REQ_CATEGORY"));
+            validator.validateThis(pages).with(new PositiveNumber("CT_PAGES_POSITIVE"));
+    
+                next();
+        } 
+        catch (error) 
+            {
              /**
               * @note Rollback de Archivo: Si el archivo fue subido exitosamente a la carpeta temporal 
               * por Multer, pero los campos de texto fallan la validación, debemos eliminar físicamente 
@@ -137,6 +137,27 @@
                     .with(new Required("CT_REQ_CATEGORY"))
                     .with(new PositiveNumber("CT_REQ_CATEGORY"));
             validator.validateThis(pages).with(new PositiveNumber("CT_PAGES_POSITIVE"));
+
+            next();
+        }
+            catch (error)
+        {
+            return res.status(400).json({ message: error.message });
+        }
+    },
+
+    /*@nota: esto es para el agregado de nuevas categorías*/
+    
+    validateCategoryCreate: (req, res, next) =>
+    {
+        const validator = new Validator();
+        const { name } = req.body;
+
+        try
+        {
+            validator.validateThis(name)
+                     .with(new Required("CT_REQ_CATEGORY_NAME"))
+                     .with(new MinLength(2, "CT_REQ_CATEGORY_NAME"));
 
             next();
         }

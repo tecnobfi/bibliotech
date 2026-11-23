@@ -95,7 +95,7 @@ CREATE TABLE books (
     pages INT DEFAULT 0,
     file_path VARCHAR(255) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE, /*@note: faltaba una coma*/
     FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE RESTRICT
 );
 
@@ -223,6 +223,19 @@ END //
 CREATE PROCEDURE sp_get_all_categories()
 BEGIN
     SELECT id, name FROM categories ORDER BY name;
+END //
+
+/*@note Quise añadir una opción para poder añadir categorías*/
+
+/*
+ * @brief Crea una categoría nueva.
+ * @note El UNIQUE de categories.name ya impide duplicados; si el nombre existe,
+ * MySQL devuelve ER_DUP_ENTRY, que el global_error_middleware ya traduce a 409.
+ */
+CREATE PROCEDURE sp_create_category(IN p_name VARCHAR(100))
+BEGIN
+    INSERT INTO categories (name) VALUES (p_name);
+    SELECT LAST_INSERT_ID() as insertId;
 END //
 
 /*
