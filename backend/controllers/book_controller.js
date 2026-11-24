@@ -83,36 +83,31 @@ const auditRepository = require('../repositories/audit\_repository');
       * @param {Object} res - Respuesta HTTP.
       * @param {Function} next - Función para delegar errores.
       */
-     async deleteBook(req, res, next) 
-     {
-         try 
-         {
-             const { id } = req.params;
-             const userId = req.userId;
- 
-             // Obtener información del libro para validar propiedad y conocer ruta física
-             const book = await bookRepository.findById(id, userId);
-             
-             if (!book) 
-             {
-                 const message = i18n.getMessage('CT_BOOK_NOT_FOUND');
-                 return res.status(404).json({ message });
+     
+        async deleteBook(req, res, next) {
+            try {
+              const { id } = req.params;
+              const userId = req.userId; // Corregido: req.userId
+
+               const book = await bookRepository.findById(id, userId);
+             if (!book) {
+              const message = i18n.getMessage('CT_BOOK_NOT_FOUND');
+                return res.status(404).json({ message });
              }
- 
-             // Eliminar registro en base de datos
-             await bookRepository.delete(id, userId);
- 
-             // Eliminar archivo físico en disco de forma síncrona
-             fileHelper.deleteFile(book.file_path); 
-             
-             const message = i18n.getMessage('CT_BOOK_DELETED_SUCCESS');
-             res.json({ message });
-         }
-         catch (error)
-         {
-             next(error);
-         }
-     }
+
+            // Llamada correcta al método del repositorio
+            await bookRepository.delete(id, userId);
+            fileHelper.deleteFile(book.file_path);
+
+            // Registro de auditoría asincrónico
+           auditRepository.logAction(userId, 'DELETE_BOOK', `Book ID: ${id}`, req.ip);
+
+           const message = i18n.getMessage('CT_BOOK_DELETED_SUCCESS');
+           res.json({ message });
+          } catch (error) {
+           next(error);
+             }
+        }
 
       /**
       * @brief Procesa la solicitud HTTP PUT para actualizar los metadatos de un libro.
