@@ -7,6 +7,7 @@
  * @date Octubre 2026
  */
 
+const auditRepository = require('../repositories/audit\_repository');
  const fileHelper = require('../utils/file_helper/file_helper');
  const bookRepository = require('../repositories/book_repository');
  const i18n = require('../utils/i18n/i18n'); // Inyección del gestor de idiomas
@@ -112,6 +113,32 @@
              next(error);
          }
      }
+
+      /**
+      * @brief Procesa la solicitud HTTP PUT para actualizar los metadatos de un libro.
+      */
+     async updateBook(req, res, next) {
+     try {
+      const bookId = parseInt(req.params.id);
+       const ownerId = req.userId; // Corregido: req.userId
+       const { title, author, pages, categoryId } = req.body;
+
+      await bookRepository.updateMetadata(
+         bookId,
+         ownerId,
+         title,
+         author,
+         pages,
+         categoryId
+        );
+
+        const message = i18n.getMessage('CT_BOOK_UPDATE_SUCCESS');
+       res.status(200).json({ message });
+        } catch (error) {
+        next(error);
+          }
+       }
+     
  }
  
  module.exports = new BookController();
