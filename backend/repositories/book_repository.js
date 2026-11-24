@@ -73,6 +73,20 @@
          await db.execute('CALL sp_delete_book(?, ?)', [id, userId]);
          return true;
      }
+
+  /**
+ * @brief Ejecuta el Stored Procedure para modificar los metadatos de un libro existente.
+ */
+async updateMetadata(bookId, ownerId, title, author, pages, categoryId)
+{
+    await db.execute(
+        'CALL sp_update_book_metadata(?, ?, ?, ?, ?, ?)',
+        [bookId, ownerId, title, author, pages, categoryId]
+    );
+
+    return true;
+}
+
  }
  
  module.exports = new BookRepository();
