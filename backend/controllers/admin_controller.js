@@ -7,6 +7,7 @@
  * @date Octubre 2026
  */
 
+const auditRepository = require('../repositories/audit_repository');
  const userRepository = require('../repositories/user_repository');
  const bookRepository = require('../repositories/book_repository');
  const fileHelper = require('../utils/file_helper/file_helper');
@@ -44,44 +45,22 @@
       * @param {Object} res - Respuesta HTTP.
       * @param {Function} next - Función para delegar errores al Global Error Handler.
       */
-     async deleteUser(req, res, next)
-     {
-         try 
-         {
-             const targetUserId = req.params.id;
-             const adminId = req.userId; 
- 
-             // Regla de Negocio Semántica: Evitar auto-eliminación
-             if (targetUserId == adminId) 
-             {
-                 const message = i18n.getMessage('CT_ADMIN_CANT_DELETE_SELF');
-                 return res.status(403).json({ message });
-             }
- 
-             // Obtener todos los libros cargados por el usuario objetivo antes de borrarlo
-             const userBooks = await bookRepository.findByUserId(targetUserId);
-             
-             // Eliminar de la base de datos (se produce cascada a nivel de tabla 'books')
-             const success = await userRepository.delete(targetUserId);
- 
-             if (!success) 
-             {
-                 const message = i18n.getMessage('CT_ADMIN_USER_NOT_FOUND');
-                 return res.status(404).json({ message });
-             }
- 
-             // Limpieza física: Eliminar almacenamiento en disco
-             userBooks.forEach(book => {fileHelper.deleteFile(book.file_path);});
- 
-             // Reemplazo dinámico (%s) para mostrar la cantidad de archivos borrados
-             const message = i18n.getMessage('CT_ADMIN_USER_DELETED').replace('%s', userBooks.length);
-             res.json({ message });
-         } 
-         catch (error) 
-         {
-             next(error);
-         }
+      async  deleteUser(req, res, next) {
+        try {
+         const targetUserId = parseInt(req.params.id);
+         const adminId = req.userId; // Corregido: req.userId
+
+         await adminRepository.softDeleteUser(targetUserId);
+
+         // Asentar evento de auditoría
+          auditRepository.logAction(adminId, 'SOFT_DELETE_USER', `User ID: ${targetUserId}`, req.ip);
+
+         const message = i18n.getMessage('CT_USER_DELETED_SUCCESS');
+         res.json({ message });
+        } catch (error) {
+         next(error);
+        }
      }
- }
+}
  
  module.exports = new AdminController();
