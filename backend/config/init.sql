@@ -208,7 +208,7 @@ BEGIN
     DELETE FROM books WHERE id = p_id AND user_id = p_user_id;
 END //
 
-DELIMITER ;
+DELIMITER  ;
 SET foreign_key_checks = 1;
 
 CREATE TABLE IF NOT EXISTS categories (
@@ -222,7 +222,7 @@ INSERT INTO categories (name) VALUES
  ('Bases de Datos'), 
  ('Redes');
 
- DELIMITER $$ 
+ DELIMITER // 
  CREATE PROCEDURE sp_get_all_categories() 
 
  BEGIN 
@@ -231,10 +231,33 @@ INSERT INTO categories (name) VALUES
  name FROM categories
  ORDER BY name ASC; 
 
- END$$ 
+ END // 
 
  DELIMITER ;
 
   ALTER TABLE books ADD COLUMN category_id INT;
   ALTER TABLE books ADD CONSTRAINT fk_books_categories 
   FOREIGN KEY (category_id) REFERENCES categories(id);
+
+  --EDICIÓN DE METADATOS--
+
+DELIMITER //
+
+CREATE PROCEDURE sp_update_book_metadata(
+    IN p_book_id INT,
+    IN p_user_id INT,
+    IN p_title VARCHAR(255),
+    IN p_author VARCHAR(255),
+    IN p_pages INT,
+    IN p_category_id INT
+)
+BEGIN
+    UPDATE books
+    SET title = p_title,
+        author = p_author,
+        pages = p_pages,
+        category_id = p_category_id
+    WHERE id = p_book_id AND user_id = p_user_id;
+END //
+
+DELIMITER ;
