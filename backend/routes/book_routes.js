@@ -40,5 +40,8 @@
   * @brief Eliminar un documento por su ID.
   */
  router.delete('/:id', bookController.deleteBook);
+
+ // Endpoint del Requerimiento A (Edición de metadatos)
+ router.put('/:id', verifyToken, validateBookUpdate, bookController.updateBook);
  
  module.exports = router;
