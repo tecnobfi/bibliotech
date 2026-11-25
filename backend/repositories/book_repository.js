@@ -12,7 +12,7 @@
  * (controladores) y la capa de persistencia (MySQL). Centraliza el acceso a datos, 
  * evitando tener consultas SQL dispersas por toda la aplicación.
  */
- const db = require('../config/db');
+const db = require('../config/db');
 
  /**
   * @class BookRepository
@@ -29,26 +29,24 @@
       * de parámetros [...], la librería mysql2 compila la consulta (Prepared Statements) 
       * sanitizando automáticamente los valores de entrada.
       */
-     async create(bookData) 
-     {
-         const { user_id, filename, title, author, category, pages, file_path } = bookData;
-         const [rows] = await db.execute('CALL sp_create_book(?, ?, ?, ?, ?, ?, ?)',
-             [user_id, filename, title, author, category, pages, file_path]);
-             
-         // Los Stored Procedures de inserción fueron diseñados para devolver LAST_INSERT_ID()
-         return rows[0][0].insertId;
-     }
+    async create(bookData) {
+    const { user_id, filename, title, author, category, pages, file_path } = bookData;
+    const [rows] = await db.execute(
+      'CALL sp_create_book(?, ?, ?, ?, ?, ?, ?)',
+      [user_id, filename, title, author, category, pages, file_path]
+    );
+    return rows[0][0].insertId;
+  }
  
      /**
       * @brief Obtiene el listado completo de documentos pertenecientes a un cliente.
       * @param {number} userId - Identificador único del usuario.
       * @returns {Promise<Array>} Retorna un array de objetos libro.
       */
-     async findByUserId(userId) 
-     {
-         const [rows] = await db.execute('CALL sp_find_books_by_user(?)', [userId]);
-         return rows[0];
-     }
+    async findByUserId(userId) {
+    const [rows] = await db.execute('CALL sp_find_books_by_user(?)', [userId]);
+    return rows[0];
+  }
  
      /**
       * @brief Busca un documento específico validando mediante DB que pertenezca al usuario solicitante.
@@ -56,11 +54,10 @@
       * @param {number} userId - ID del usuario activo (propietario esperado).
       * @returns {Promise<Object|undefined>} Retorna el objeto del libro o undefined si no existe/no le pertenece.
       */
-     async findById(id, userId) 
-     {
-         const [rows] = await db.execute('CALL sp_find_book_by_id(?, ?)', [id, userId]);
-         return rows[0][0]; 
-     }
+    async findById(id, userId) {
+    const [rows] = await db.execute('CALL sp_find_book_by_id(?, ?)', [id, userId]);
+    return rows[0][0];
+  }
  
      /**
       * @brief Elimina un documento de la base de datos.
@@ -68,38 +65,24 @@
       * @param {number} userId - ID del usuario activo (propietario esperado).
       * @returns {Promise<boolean>} Retorna true si la ejecución del SP finalizó sin excepciones.
       */
-     async delete(id, userId) 
-     {
-         await db.execute('CALL sp_delete_book(?, ?)', [id, userId]);
-         return true;
-     }
-     
-     /**
- * @brief Modifica los metadatos de un documento existente previa validación de pertenencia.
- *
- * @param {number} bookId - ID (Primary Key) del libro a modificar.
- * @param {number} ownerId - ID del usuario propietario del libro.
- * @param {string} title - Nuevo título del libro.
- * @param {string} author - Nuevo autor del libro.
- * @param {number} pages - Nueva cantidad de páginas.
- * @param {number} categoryId - ID de la nueva categoría asociada.
- * @returns {Promise<boolean>} Retorna true si la ejecución finalizó sin excepciones.
+     async delete(id, userId) {
+    await db.execute('CALL sp_delete_book(?, ?)', [id, userId]);
+    return true;
+  }
+
+  /**
+ * @brief Ejecuta el Stored Procedure para modificar los metadatos de un libro existente.
  */
 async updateMetadata(bookId, ownerId, title, author, pages, categoryId) {
     await db.execute(
-        'CALL sp_update_book_metadata(?, ?, ?, ?, ?, ?)',
-        [
-            bookId,
-            ownerId,
-            title,
-            author,
-            pages,
-            categoryId
-        ]
+      'CALL sp_update_book_metadata(?, ?, ?, ?, ?, ?)',
+      [bookId, ownerId, title, author, pages, categoryId]
     );
-
     return true;
-}
+  }
+
+
+
  }
  
  module.exports = new BookRepository();
