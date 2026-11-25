@@ -12,11 +12,8 @@
  const bookController = require('../controllers/book_controller');
  const uploadMiddleware = require('../config/multer_config');
  const { verifyToken } = require('../middleware/auth_middleware');
-
- const { validateBookUpload, validateBookUpdate } = require('../middleware/validation_middleware');
- const { auditAction } = require('../middleware/audit_middleware');
-const auditController = require('../controllers/audit_controller');
-
+ const { validateBookUpload } = require('../middleware/validation_middleware');
+ 
  /**
   * @brief Todas las rutas de la biblioteca son privadas y requieren una sesión activa.
   */
@@ -31,11 +28,19 @@ const auditController = require('../controllers/audit_controller');
   * 3. `bookController.uploadBook` persiste los metadatos en la base de datos.
   */
  router.post('/upload', uploadMiddleware, validateBookUpload, bookController.uploadBook);
-
-router.get('/my-books', bookController.getMyBooks);
-router.delete('/:id', auditAction(auditController?.ACTIONS?.DELETE_BOOK || 'DELETE_BOOK', 'book'), bookController.deleteBook);
-router.put('/:id', validateBookUpdate, bookController.updateBook);
-
+ 
+ /**
+  * @route GET /api/books/my-books
+  * @brief Obtener la biblioteca completa del cliente autenticado.
+  */
+ router.get('/my-books', bookController.getMyBooks);
+ 
+ /**
+  * @route DELETE /api/books/:id
+  * @brief Eliminar un documento por su ID.
+  * @note El evento DELETE_BOOK se registra dentro de bookController.deleteBook (Requerimiento B).
+  */
+ router.delete('/:id', bookController.deleteBook);
  
  /**
   * @route PUT /api/books/:id
