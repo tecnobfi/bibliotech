@@ -34,6 +34,7 @@
   * @route DELETE /api/admin/users/:id
   * @brief Eliminar un usuario del sistema por su ID (incluyendo borrado en cascada).
   * @param id Identificador único del usuario (URL param).
+  * @note Los eventos DELETE_USER y DELETE_BOOK se registran dentro de adminController.deleteUser (Requerimiento B).
   */
  router.delete('/users/:id', adminController.deleteUser);
  

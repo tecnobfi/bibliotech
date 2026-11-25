@@ -11,6 +11,7 @@
  const bookRepository = require('../repositories/book_repository');
  const fileHelper = require('../utils/file_helper/file_helper');
  const i18n = require('../utils/i18n/i18n'); // Inyección del gestor de idiomas
+ const auditController = require('./audit_controller'); // Capa de Auditoría (Requerimiento B)
  
  /**
   * @class AdminController
@@ -72,6 +73,19 @@
  
              // Limpieza física: Eliminar almacenamiento en disco
              userBooks.forEach(book => {fileHelper.deleteFile(book.file_path);});
+
+             /**
+              * @note Auditoría (Requerimiento B), asincrónica (sin await) y solo tras un borrado exitoso.
+              * Además del DELETE_USER, se registra un DELETE_BOOK por cada libro del usuario: la
+              * cascada de la base los borra sin pasar por deleteBook, y sin estos registros el
+              * historial no mostraría qué documentos se perdieron ni quién los eliminó (el admin).
+              */
+             auditController.logEvent(adminId, auditController.ACTIONS.DELETE_USER, `user:${targetUserId}`, req.ip);
+             userBooks.forEach(book => 
+             {
+                 auditController.logEvent(adminId, auditController.ACTIONS.DELETE_BOOK,
+                     `book:${book.id} (${book.title})`, req.ip);
+             });
  
              // Reemplazo dinámico (%s) para mostrar la cantidad de archivos borrados
              const message = i18n.getMessage('CT_ADMIN_USER_DELETED').replace('%s', userBooks.length);

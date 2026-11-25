@@ -38,7 +38,16 @@
  /**
   * @route DELETE /api/books/:id
   * @brief Eliminar un documento por su ID.
+  * @note El evento DELETE_BOOK se registra dentro de bookController.deleteBook (Requerimiento B).
   */
  router.delete('/:id', bookController.deleteBook);
  
+ /**
+  * @route PUT /api/books/:id
+  * @brief Actualizar los metadatos de un documento por su ID.
+  * @note No hace falta volver a pasar verifyToken: ya se aplica a todas las rutas
+  * de este router con router.use(verifyToken).
+  */
+ router.put('/:id', bookController.updateBook);
+
  module.exports = router;

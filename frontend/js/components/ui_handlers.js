@@ -135,3 +135,102 @@
      document.getElementById('pdfIframe').src = pdfUrl;
      modal.style.display = 'block';
  }
+ /**
+ * Despliega un modal interactivo construido 100% mediante manipulaciones del DOM nativo.
+ *
+ * @param {Object} book Datos del libro a editar
+ */
+function openEditModal(book) {
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay';
+
+    const modalBox = document.createElement('div');
+    modalBox.className = 'modal-box';
+
+    const titleHeader = document.createElement('h3');
+    titleHeader.textContent = 'Editar Metadatos del Libro';
+
+    // Campo Título
+    const labelTitle = document.createElement('label');
+    labelTitle.textContent = 'Título:';
+
+    const inputTitle = document.createElement('input');
+    inputTitle.type = 'text';
+    inputTitle.value = book.displayname || book.title || '';
+
+    // Campo Autor
+    const labelAuthor = document.createElement('label');
+    labelAuthor.textContent = 'Autor:';
+
+    const inputAuthor = document.createElement('input');
+    inputAuthor.type = 'text';
+    inputAuthor.value = book.author || '';
+
+    // Campo Páginas
+    const labelPages = document.createElement('label');
+    labelPages.textContent = 'Páginas:';
+
+    const inputPages = document.createElement('input');
+    inputPages.type = 'number';
+    inputPages.value = book.pages || 0;
+
+    // Botones de Acción
+    const btnSave = document.createElement('button');
+    btnSave.textContent = 'Guardar Cambios';
+    btnSave.className = 'btn-success';
+
+    const btnCancel = document.createElement('button');
+    btnCancel.textContent = 'Cancelar';
+    btnCancel.className = 'btn-secondary';
+
+    btnCancel.addEventListener('click', () => {
+        overlay.remove();
+    });
+
+    btnSave.addEventListener('click', async () => {
+        try {
+            const categorySelect = document.getElementById('category');
+
+            const selectedCategory = categorySelect
+                ? parseInt(categorySelect.value)
+                : book.category_id;
+
+            const updatedData = {
+                title: inputTitle.value,
+                author: inputAuthor.value,
+                pages: parseInt(inputPages.value),
+                categoryId: selectedCategory
+            };
+
+            await apiService.request(
+                `/books/${book.id}`,
+                'PUT',
+                updatedData
+            );
+
+            overlay.remove();
+            window.location.reload();
+
+        } catch (err) {
+            alert('Error al guardar cambios: ' + err.message);
+        }
+    });
+
+    const buttonGroup = document.createElement('div');
+    buttonGroup.className = 'modal-buttons';
+    buttonGroup.replaceChildren(btnSave, btnCancel);
+
+    modalBox.replaceChildren(
+        titleHeader,
+        labelTitle,
+        inputTitle,
+        labelAuthor,
+        inputAuthor,
+        labelPages,
+        inputPages,
+        buttonGroup
+    );
+
+    overlay.appendChild(modalBox);
+    document.body.appendChild(overlay);
+}

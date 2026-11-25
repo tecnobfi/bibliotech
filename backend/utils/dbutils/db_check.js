@@ -57,7 +57,7 @@
              
              const [dbRows] = await rootConnection.query("SHOW DATABASES LIKE 'bibliotech'");
              if (dbRows.length === 0) {
-                 console.log("❌ La base de datos 'bibliotech' NO existe. Debes correr 'node utils/setupDb.js'.");
+                 console.log("❌ La base de datos 'bibliotech' NO existe. Debes correr 'node utils/dbutils/db_setup.js'.");
              } else {
                  console.log("✅ La base de datos 'bibliotech' existe.");
                  await rootConnection.query("USE bibliotech");

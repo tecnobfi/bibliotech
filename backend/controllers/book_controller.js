@@ -10,6 +10,7 @@
  const fileHelper = require('../utils/file_helper/file_helper');
  const bookRepository = require('../repositories/book_repository');
  const i18n = require('../utils/i18n/i18n'); // Inyección del gestor de idiomas
+ const auditController = require('./audit_controller'); // Capa de Auditoría (Requerimiento B)
  
  /**
   * @class BookController
@@ -103,6 +104,16 @@
  
              // Eliminar archivo físico en disco de forma síncrona
              fileHelper.deleteFile(book.file_path); 
+
+             /**
+              * @note Auditoría (Requerimiento B): se registra recién acá, cuando el borrado ya se
+              * confirmó (un 404 nunca llega a esta línea). logEvent no usa await: el registro corre
+              * en segundo plano y no demora la respuesta al cliente.
+              * El target incluye el título porque, una vez borrado el libro, 'book:15' solo ya no
+              * permitiría saber qué documento era (análisis forense).
+              */
+             auditController.logEvent(userId, auditController.ACTIONS.DELETE_BOOK,
+                 `book:${book.id} (${book.title})`, req.ip);
              
              const message = i18n.getMessage('CT_BOOK_DELETED_SUCCESS');
              res.json({ message });
@@ -112,6 +123,41 @@
              next(error);
          }
      }
+  /**
+ 
+@brief Procesa la solicitud HTTP PUT para actualizar los metadatos de un libro.
+@param {Object} req - Petición HTTP Express.
+@param {Object} res - Respuesta HTTP Express.
+@param {Function} next - Función para delegar errores al Global Error Handler.*/
+async updateBook(req, res, next)
+{
+    try
+    {
+        const bookId = parseInt(req.params.id);
+        const ownerId = req.userId;
+
+        const { title, author, pages, categoryId } = req.body;
+
+        await bookRepository.updateMetadata(
+            bookId,
+            ownerId,
+            title,
+            author,
+            pages,
+            categoryId
+        );
+
+        const message = i18n.getMessage('CT_BOOK_UPDATE_SUCCESS');
+
+        res.status(200).json({ message });
+    }
+    catch (error)
+    {
+        next(error);
+    }
+}   
+     
+     
  }
  
  module.exports = new BookController();
