@@ -14,9 +14,6 @@
  const auditController = require('./audit_controller'); // Capa de Auditoría (Requerimiento B)
 
 const auditRepository = require('../repositories/audit_repository');
-const fileHelper = require('../utils/file_helper/file_helper');
-const bookRepository = require('../repositories/book_repository');
-const i18n = require('../utils/i18n/i18n');
 
  
  /**
