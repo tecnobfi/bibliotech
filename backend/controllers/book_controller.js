@@ -14,9 +14,6 @@
  const auditController = require('./audit_controller'); // Capa de Auditoría (Requerimiento B)
 
 const auditRepository = require('../repositories/audit_repository');
-const fileHelper = require('../utils/file_helper/file_helper');
-const bookRepository = require('../repositories/book_repository');
-const i18n = require('../utils/i18n/i18n');
 
  
  /**
@@ -122,31 +119,6 @@ const i18n = require('../utils/i18n/i18n');
 @param {Object} req - Petición HTTP Express.
 @param {Object} res - Respuesta HTTP Express.
 @param {Function} next - Función para delegar errores al Global Error Handler.*/
-async updateBook(req, res, next)
-{
-    try
-    {
-        const bookId = parseInt(req.params.id);
-        const ownerId = req.userId;
-
-     
-       async deleteBook(req, res, next) {
-    try {
-      const { id } = req.params;
-      const userId = req.userId;
-      const book = await bookRepository.findById(id, userId);
-      if (!book) {
-        const message = i18n.getMessage('CT_BOOK_NOT_FOUND');
-        return res.status(404).json({ message });
-      }
-      await bookRepository.delete(id, userId);
-      fileHelper.deleteFile(book.file_path);
-      const message = i18n.getMessage('CT_BOOK_DELETED_SUCCESS');
-      res.json({ message });
-    } catch (error) {
-      next(error);
-    }
-  }
 
       /**
       * @brief Procesa la solicitud HTTP PUT para actualizar los metadatos de un libro.
@@ -173,5 +145,9 @@ async updateBook(req, res, next)
 
      
  }
+
+
+
+
  
  module.exports = new BookController();
