@@ -1,12 +1,21 @@
 const db = require('../config/db');
 
 class AuditRepository {
-  /**
-   * Asienta un evento de auditoría en la base de datos de manera no bloqueante.
-   */
-  async logAction(userId, action, target, ip = null) {
-    db.execute('CALL sp_create_audit_log(?, ?, ?, ?)', [userId, action, target, ip])
-      .catch(error => console.error('Falla al asentar evento de auditoría:', error));
+  async create(userId, action, target, ipAddress = null) {
+    const [rows] = await db.execute(
+      'CALL sp_create_audit_log(?, ?, ?, ?)',
+      [userId, action, target, ipAddress]
+    );
+    return rows[0][0].insertId;
+  }
+
+  async logAction(userId, action, target, ipAddress = null) {
+    return this.create(userId, action, target, ipAddress);
+  }
+
+  async findAll() {
+    const [rows] = await db.execute('CALL sp_find_all_audit_logs()');
+    return rows[0];
   }
 }
 

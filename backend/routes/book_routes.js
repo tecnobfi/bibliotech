@@ -12,8 +12,9 @@
  const bookController = require('../controllers/book_controller');
  const uploadMiddleware = require('../config/multer_config');
  const { verifyToken } = require('../middleware/auth_middleware');
- const { validateBookUpload } = require('../middleware/validation_middleware');
- 
+ const { validateBookUpload, validateBookUpdate } = require('../middleware/validation_middleware');
+ const { auditAction } = require('../middleware/audit_middleware');
+const auditController = require('../controllers/audit_controller');
  /**
   * @brief Todas las rutas de la biblioteca son privadas y requieren una sesión activa.
   */
@@ -28,20 +29,8 @@
   * 3. `bookController.uploadBook` persiste los metadatos en la base de datos.
   */
  router.post('/upload', uploadMiddleware, validateBookUpload, bookController.uploadBook);
- 
- /**
-  * @route GET /api/books/my-books
-  * @brief Obtener la biblioteca completa del cliente autenticado.
-  */
- router.get('/my-books', bookController.getMyBooks);
- 
- /**
-  * @route DELETE /api/books/:id
-  * @brief Eliminar un documento por su ID.
-  */
- router.delete('/:id', bookController.deleteBook);
-
- // Endpoint del Requerimiento A (Edición de metadatos)
- router.put('/:id', verifyToken, validateBookUpdate, bookController.updateBook);
+router.get('/my-books', bookController.getMyBooks);
+router.delete('/:id', auditAction(auditController?.ACTIONS?.DELETE_BOOK || 'DELETE_BOOK', 'book'), bookController.deleteBook);
+router.put('/:id', validateBookUpdate, bookController.updateBook);
  
  module.exports = router;
