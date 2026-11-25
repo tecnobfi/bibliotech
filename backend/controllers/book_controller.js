@@ -69,6 +69,7 @@ const i18n = require('../utils/i18n/i18n');
       * @param {Object} res - Respuesta HTTP.
       * @param {Function} next - Función para delegar errores.
       */
+
      
        async deleteBook(req, res, next) {
     try {
@@ -110,6 +111,7 @@ const i18n = require('../utils/i18n/i18n');
       next(error);
     }
   }
+
      
  }
  

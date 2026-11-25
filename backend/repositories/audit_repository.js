@@ -1,3 +1,4 @@
+
 const db = require('../config/db');
 
 class AuditRepository {
@@ -20,3 +21,4 @@ class AuditRepository {
 }
 
 module.exports = new AuditRepository();
+

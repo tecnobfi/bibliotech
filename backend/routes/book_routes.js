@@ -12,9 +12,11 @@
  const bookController = require('../controllers/book_controller');
  const uploadMiddleware = require('../config/multer_config');
  const { verifyToken } = require('../middleware/auth_middleware');
+
  const { validateBookUpload, validateBookUpdate } = require('../middleware/validation_middleware');
  const { auditAction } = require('../middleware/audit_middleware');
 const auditController = require('../controllers/audit_controller');
+
  /**
   * @brief Todas las rutas de la biblioteca son privadas y requieren una sesión activa.
   */
@@ -29,8 +31,18 @@ const auditController = require('../controllers/audit_controller');
   * 3. `bookController.uploadBook` persiste los metadatos en la base de datos.
   */
  router.post('/upload', uploadMiddleware, validateBookUpload, bookController.uploadBook);
+
 router.get('/my-books', bookController.getMyBooks);
 router.delete('/:id', auditAction(auditController?.ACTIONS?.DELETE_BOOK || 'DELETE_BOOK', 'book'), bookController.deleteBook);
 router.put('/:id', validateBookUpdate, bookController.updateBook);
+
  
+ /**
+  * @route PUT /api/books/:id
+  * @brief Actualizar los metadatos de un documento por su ID.
+  * @note No hace falta volver a pasar verifyToken: ya se aplica a todas las rutas
+  * de este router con router.use(verifyToken).
+  */
+ router.put('/:id', bookController.updateBook);
+
  module.exports = router;

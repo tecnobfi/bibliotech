@@ -130,6 +130,7 @@ BEGIN
   JOIN roles r ON ur.role_id = r.id;
 END //
 
+
 CREATE PROCEDURE sp_delete_user(IN p_id INT)
 BEGIN
   DELETE FROM users WHERE id = p_id;
@@ -188,6 +189,7 @@ BEGIN
 END //
 DELIMITER ;
 
+
 ALTER TABLE books ADD COLUMN category_id INT;
 ALTER TABLE books ADD CONSTRAINT fk_books_categories FOREIGN KEY (category_id) REFERENCES categories(id);
 
@@ -241,6 +243,7 @@ BEGIN
   SELECT LAST_INSERT_ID() as insertId;
 END //
 
+
 CREATE PROCEDURE sp_find_all_audit_logs()
 BEGIN
   SELECT a.id, a.user_id, u.username, a.action, a.target, a.ip_address, a.created_at
@@ -250,5 +253,7 @@ BEGIN
 END //
 DELIMITER ;
 
+
 -- Reactivar chequeos de claves foráneas al finalizar la inicialización completa
 SET foreign_key_checks = 1;
+
